@@ -1,0 +1,336 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %} Pembelian {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="{% static '/plugins/fontawesome-free/css/all.min.css' %}">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="{% static '/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static '/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static '/css/adminlte.min.css' %}">
+  <!-- Custom style -->
+  <link rel="stylesheet" href="{% static '/css/custom.css' %}">
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Pembelian</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Pembelian</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+
+            <!-- /.card -->
+            <div class="card">
+              <div class="card-header">
+                  <h3 class="card-title">Tabel Pembelian</h3>
+                  <div class="float-sm-right">
+                      <button type="button" title="tambah data" data-toggle="modal" data-target="#modal-lg" class="btn btn-success">Tambah Data</button>
+                      <a href="/pdf-penjualan.html" id="penjualan" class="btn btn-warning">Export to PDF</a>
+                      <button type="button" title="export to excel" id="exportexcel" data-toggle="tooltip" class="btn btn-info">Export to Excel</button>
+                  </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table id="table-penjualan" class="table table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th>No Faktur</th>
+                    <th>Nama Distributor</th>
+                    <th>Tanggal</th>
+                    <th>Nama Produk</th>
+                    <th>Jumlah Beli</th>
+                    <th>Harga Beli</th>
+                    <th>Total (IDR)</th>
+                    <th>Aksi</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for item in table_pembelian %}
+                      <tr id="sale-{{ item.no_faktur_pembelian }}">
+                        <td>{{ item.no_faktur_pembelian }}</td>
+                        <td class="nama-konsumen">{{ item.petugas__distributor__nama_distributor }}</td>
+                        <td class="produk">{{ item.tanggal_pembelian }}</td>
+                        <td class="tanggal-jual">{{ item.detailfakturpembelian__produk__nama_produk }}</td>
+                        <td class="kuantitas">{{ item.detailfakturpembelian__kuantitas }}</td>
+                        <td class="harga">{{ item.detailfakturpembelian__harga_satuan }}</td>
+                        <td>{% widthratio item.detailfakturpembelian__kuantitas 1 item.detailfakturpembelian__harga_satuan %}</td>
+                        <td class="text-center">
+                            <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.no_faktur_penjualan }})"
+                                    data-toggle="modal" id="edit" class="btn btn-success btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" title="delete" data-toggle="modal" data-target="#modal-delete"
+                                    onClick="deletePenjualan({{ item.no_faktur_pembelian }})" class="btn btn-danger btn-sm">
+                                <i class="far fa-trash-alt"></i>
+                            </button>
+                        </td>
+                      </tr>
+                  {% endfor %}
+                  </tbody>
+{#                  <tfoot>#}
+{#                  <tr>#}
+{#                    <th>Rendering engine</th>#}
+{#                    <th>Browser</th>#}
+{#                    <th>Platform(s)</th>#}
+{#                    <th>Engine version</th>#}
+{#                    <th>CSS grade</th>#}
+{#                  </tr>#}
+{#                  </tfoot>#}
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+        <!-- Modal Create -->
+        <div class="modal fade" id="modal-lg">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title mb-4">Tambah Data</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <form class="sales-form webform" method="POST">
+                        {% csrf_token %}
+
+                        <label for="no_faktur_pembelian">Nama distributor:</label>
+                        <select name="nama_distributor" class="form-control form-control-lg form-custom" id="no_faktur_pembelian">
+                            {% for item in nama_distributor %}
+                           <option value="{{ item.nama_distributor }}">{{ item.nama_distributor }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="no_faktur_pembelian">Nama petugas:</label>
+                        <select name="nama_petugas" class="form-control form-control-lg form-custom" id="no_faktur_pembelian">
+                            {% for item in petugas %}
+                           <option value="{{ item.nama_petugas }}">{{ item.nama_petugas }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="tanggal_pembelian">Waktu beli:</label>
+                        <input name="tanggal_pembelian" type="date" class="form-control form-custom" id="tanggal_pembelian" required>
+
+
+                        <label for="jenis_produk">Jenis Produk:</label>
+                        <select name="nama_jenis_produk" class="form-control form-control-lg form-custom" id="jenis_produk">
+                            {% for item in jenis_produk %}
+                           <option value="{{ item.nama_jenis_produk }}">{{ item.nama_jenis_produk }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="nama_produk">Nama produk:</label>
+                        <input type="text" name="nama_produk" class="form-control form-custom" required id="nama_produk">
+
+                        <label for="id_kuantitas">Kuantitas:</label>
+                        <input type="number" name="kuantitas" data-toggle="tooltip" title="Stok" class="form-control form-control-lg form-custom" required="" id="id_kuantitas">
+
+                        <label for="harga_satuan">Harga beli satuan:</label>
+                        <input type="number" step="10000" name="harga_satuan" class="form-control form-custom" required id="harga_satuan">
+
+                        <label for="tanggal_kadaluarsa">Tanggal kadaluarsa:</label>
+                        <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal_kadaluarsa" required>
+
+                        <button type="submit" class="form-control" style="margin-top: 2.3rem;" id="submit-button">Submit Button</button>
+                    </form>
+                </div>
+              </div>
+              <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+          </div>
+        <!-- /.Modal Create -->
+
+        <!-- /.Modal Edit -->
+        <div class="modal fade" id="modal-edit">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title mb-4">Edit Data</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <form class="sales-form webform" method="POST">
+                        {% csrf_token %}
+                        <input name="id" type="hidden" id="edit-id">
+                        <label for="edit-tanggal">Tanggal jual:</label>
+                        <input name="tanggal_jual" type="date" class="form-control form-custom" data-toggle="tooltip" id="edit-tanggal" required>
+
+                        <label for="edit-konsumen">Nama konsumen:</label>
+                        <select name="konsumen" class="form-control form-control-lg form-custom" id="edit-konsumen">
+                            {% for item in konsumen_form %}
+                           <option value="{{ item.value }}">{{ item.option }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label for="edit-produk">Pilih produk:</label>
+                        <select name="produk" class="form-control form-control-lg form-custom" id="edit-produk">
+                        {% for item in produk_form %}
+                        <option value="{{ item.value }}">{{ item.option }}</option>
+                        {% endfor %}
+                        </select>
+
+                        <label for="edit-kuantitas">Kuantitas:</label>
+                        <input name="kuantitas" type="number" class="form-control form-control-lg form-custom" id="edit-kuantitas" required>
+
+                        <button type="submit" class="form-control" style="margin-top: 2.3rem;" name="update" id="submit-button">Update</button>
+                    </form>
+                </div>
+              </div>
+              <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+          </div>
+        <!-- /.Modal Edit -->
+
+        <!-- Modal Delete -->
+        <div class="modal fade" id="modal-delete">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title mb-3">Delete</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you wont to remove this data? Data cannot be recovered once delete.</p>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="delete-data">
+                    <button type="submit" name="delete" class="btn btn-danger float-sm-right">Yes, i'm Sure</button>
+                </form>
+
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+    <!-- /.Modal Delete -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="{% static '/plugins/jquery/jquery.min.js' %}"></script>
+  <!-- Bootstrap 4 -->
+  <script src="{% static '/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <!-- DataTables -->
+  <script src="{% static '/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static '/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static '/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+  <script src="{% static '/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+  <!-- Table to excel -->
+  <script src="{% static '/js/export/table2excel.js' %}"></script>
+  <!-- AdminLTE App -->
+  <script src="{% static '/js/adminlte.min.js' %}"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="{% static '/js/demo.js' %}"></script>
+  <!-- page script -->
+  <script>
+  // window.onload = function() { window.print(); }
+    $(function () {
+      $("#table-penjualan").DataTable({
+        "responsive": true,
+        "autoWidth": false,
+      });
+      $('#example2').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+      });
+    });
+
+    // delete data
+    function deletePenjualan(id) {
+        $('#delete-data').val(id);
+    }
+
+    // update penjualan
+    function editPenjualan(id) {
+        tr_id = '#sale-' + id;
+        tgl_jual = formatDate($(tr_id).find(".tanggal-jual").text());
+        konsumen = $(tr_id).find(".nama-konsumen").text();
+        produk = $(tr_id).find(".produk").text();
+        kuantitas = $(tr_id).find(".kuantitas").text();
+
+        $('#edit-id').val(id);
+        $('#edit-tanggal').val(tgl_jual);
+        $('#edit-konsumen').val(konsumen);
+        $('#edit-produk').val(produk);
+        $('#edit-kuantitas').val(kuantitas);
+    }
+
+    // datetime convert
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+
+    document.getElementById('exportexcel').addEventListener('click', function() {
+        var table2excel = new Table2Excel();
+        table2excel.export(document.querySelectorAll("#table-penjualan"), name='Tabel Penjualan');
+    });
+
+  </script>
+
+{% endblock javascripts %}

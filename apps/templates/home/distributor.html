@@ -1,0 +1,281 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block title %} Distributor {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="{% static '/plugins/fontawesome-free/css/all.min.css' %}">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="{% static '/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+  <link rel="stylesheet" href="{% static '/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static '/css/adminlte.min.css' %}">
+  <!-- Custom style -->
+  <link rel="stylesheet" href="{% static '/css/custom.css' %}">
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Distributor</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Distributor</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+
+            <!-- /.card -->
+            <div class="card">
+              <div class="card-header">
+                  <h3 class="card-title">Tabel Produk</h3>
+                  <div class="float-sm-right">
+                      <button type="button" title="tambah data" data-toggle="modal" data-target="#modal-lg" class="btn btn-success">Tambah Data</button>
+                      <a href="/pdf-produk.html" class="btn btn-warning">Export to PDF</a>
+                      <button type="button" title="export to excel" id="exportexcel" data-toggle="tooltip" class="btn btn-info">Export to Excel</button>
+                  </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table id="table-produk" class="table table-bordered table-striped">
+                  <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nama Distributor</th>
+                    <th>Nomor Hp</th>
+                    <th>Alamat</th>
+                    <th>Aksi</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for item in distributor %}
+                      <tr id="distributor-{{ item.id_distributor }}">
+                        <td>{{ item.id_distributor }}</td>
+                        <td class="nama-distributor">{{ item.nama_distributor }}</td>
+                        <td class="no-telpon">{{ item.no_telepon }}</td>
+                        <td class="alamat">{{ item.alamat_distributor }}</td>
+                        <td>
+                            <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.id_distributor }})"
+                                    data-toggle="modal" id="edit" class="btn btn-success btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" title="delete" data-toggle="modal" data-target="#modal-delete"
+                                    onClick="deletePenjualan({{ item.id_distributor }})" class="btn btn-danger btn-sm">
+                                <i class="far fa-trash-alt"></i>
+                            </button>
+                        </td>
+                      </tr>
+                  {% endfor %}
+                  </tbody>
+{#                  <tfoot>#}
+{#                  <tr>#}
+{#                    <th>Rendering engine</th>#}
+{#                    <th>Browser</th>#}
+{#                    <th>Platform(s)</th>#}
+{#                    <th>Engine version</th>#}
+{#                    <th>CSS grade</th>#}
+{#                  </tr>#}
+{#                  </tfoot>#}
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+        <!-- Modal Create -->
+        <div class="modal fade" id="modal-lg">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title mb-4">Tambah Data</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <form class="sales-form webform" method="POST">
+                        {% csrf_token %}
+
+                        {{ form_distributor }}
+
+                        <button type="submit" class="form-control" style="margin-top: 2.3rem;" id="submit-button">Submit Button</button>
+                    </form>
+                </div>
+              </div>
+              <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+          </div>
+        <!-- /.Modal Create -->
+
+        <!-- /.Modal Edit -->
+        <div class="modal fade" id="modal-edit">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title mb-4">Edit Data</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <form class="sales-form webform" method="POST">
+                        {% csrf_token %}
+                        <input name="id" type="hidden" id="edit-id">
+                        <label for="id-nama-distributor">Nama Distributor:</label>
+                        <input type="text" name="nama_distributor" class="form-control form-custom" data-toggle="tooltip" title="Nama Lengkap" required id="id-nama-distributor">
+                        <label for="id-no-telepon">Nomor HP:</label>
+                        <input type="text" name="no_telepon" class="form-control form-custom" pattern="[0-9]\d{8,16}" maxlength="100" required id="id-no-telepon">
+                        <label for="id-alamat-distributor">Alamat:</label>
+                        <input type="text" name="alamat_distributor" class="form-control form-custom" maxlength="254" required id="id-alamat-distributor">
+
+                        <button type="submit" class="form-control" style="margin-top: 2.3rem;" name="update" id="submit-button">Update</button>
+                    </form>
+                </div>
+              </div>
+              <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+          </div>
+        <!-- /.Modal Edit -->
+
+        <!-- Modal Delete -->
+        <div class="modal fade" id="modal-delete">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title mb-3">Delete</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you wont to remove this data? Data cannot be recovered once delete.</p>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="delete-data">
+                    <button type="submit" name="delete" class="btn btn-danger float-sm-right">Yes, i'm Sure</button>
+                </form>
+
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+    <!-- /.Modal Delete -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="{% static '/plugins/jquery/jquery.min.js' %}"></script>
+  <!-- Bootstrap 4 -->
+  <script src="{% static '/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  <!-- DataTables -->
+  <script src="{% static '/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+  <script src="{% static '/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+  <script src="{% static '/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+  <script src="{% static '/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+  <!-- Table to excel -->
+  <script src="{% static '/js/export/table2excel.js' %}"></script>
+  <!-- AdminLTE App -->
+  <script src="{% static '/js/adminlte.min.js' %}"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="{% static '/js/demo.js' %}"></script>
+  <!-- page script -->
+  <script>
+
+    $(function () {
+      $("#table-produk").DataTable({
+        "responsive": true,
+        "autoWidth": false,
+      });
+      $('#example2').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true,
+      });
+    });
+
+    // delete data
+    function deletePenjualan(id) {
+        $('#delete-data').val(id);
+    }
+
+    // update penjualan
+    function editPenjualan(id) {
+        tr_id = '#distributor-' + id;
+        nama = $(tr_id).find(".nama-distributor").text();
+        no_telpon = $(tr_id).find(".no-telpon").text();
+        alamat = $(tr_id).find(".alamat").text();
+
+        $('#edit-id').val(id);
+        $('#id-nama-distributor').val(nama);
+        $('#id-no-telepon').val(no_telpon);
+        $('#id-alamat-distributor').val(alamat);
+    }
+
+    // datetime convert
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+
+    // function export table to excel
+    document.getElementById('exportexcel').addEventListener('click', function() {
+        var table2excel = new Table2Excel();
+        table2excel.export(document.querySelectorAll("#table-produk"), name='Tabel Distributor');
+    });
+
+  </script>
+
+{% endblock javascripts %}

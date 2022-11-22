@@ -1,0 +1,87 @@
+{% extends "layouts/base-fullscreen.html" %}
+{% load static %}
+{% block title %} Penjualan {% endblock %}
+{% block stylesheets %}
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static '/plugins/fontawesome-free/css/all.min.css' %}">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="{% static '/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static '/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{% static '/css/adminlte.min.css' %}">
+
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="content">
+        <!-- Main content -->
+        <section class="content">
+          <div class="container-fluid">
+          <!-- header -->
+          <div class="mb-3 mt-3">
+              <h3 >Budi Jaya Tani</h3>
+          </div>
+            <div class="row">
+              <div class="col-12">
+
+                <!-- /.card -->
+                <div class="card">
+                  <div class="card-header">
+                      <h3 class="card-title">Tabel Penjualan</h3>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body">
+                    <table id="table-penjualan" class="table table-bordered table-striped">
+                      <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Nama Konsumen</th>
+                        <th>Alamat</th>
+                        <th>Produk</th>
+                        <th>Tanggal</th>
+                        <th>Kuantitas</th>
+                        <th>Harga Jual (IDR)</th>
+                        <th>Total (IDR)</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      {% for item in penjualan %}
+                          <tr id="sale-{{ item.no_faktur_penjualan }}">
+                            <td>{{ item.no_faktur_penjualan }}</td>
+                            <td>{{ item.konsumen__nama_konsumen }}</td>
+                            <td>{{ item.konsumen__alamat_konsumen }}</td>
+                            <td>{{ item.detailfakturpenjualan__produk__nama_produk }}</td>
+                            <td>{{ item.tanggal_jual }}</td>
+                            <td>{{ item.detailfakturpenjualan__kuantitas }}</td>
+                            <td>{{ item.detailfakturpenjualan__produk__detailproduk__harga_jual_satuan }}</td>
+                            <td>{% widthratio item.detailfakturpenjualan__kuantitas 1 item.detailfakturpenjualan__produk__detailproduk__harga_jual_satuan %}</td>
+                          </tr>
+                      {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- /.container-fluid -->
+        </section>
+    </div>
+
+{% endblock %}
+{% block javascripts %}
+<script>
+    window.onload = function() {
+        window.print();
+    }
+    setTimeout(function (){
+        window.location.replace('/penjualan.html');
+    }, 1000)
+</script>
+{% endblock %}
