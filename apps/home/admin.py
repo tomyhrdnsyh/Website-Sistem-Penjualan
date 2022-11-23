@@ -61,7 +61,10 @@ class ProductDetailAdmin(admin.ModelAdmin):
     list_display = ("produk", "stok", "tanggal_kadaluarsa", "harga_jual_satuan")
 
 
-admin.site.register(JenisProduk)
+# admin.site.register(JenisProduk)
+@admin.register(JenisProduk)
+class JenisProduk(admin.ModelAdmin):
+    list_display = ('id_jenis_produk', 'nama_jenis_produk')
 
 
 @admin.register(FakturPenjualan)

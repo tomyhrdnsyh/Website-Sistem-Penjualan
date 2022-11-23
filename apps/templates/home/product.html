@@ -84,12 +84,19 @@
                         <td class="jenis">{{ item.jenis_produk__nama_jenis_produk }}</td>
                         <td class="kadaluarsa">{{ item.detailproduk__tanggal_kadaluarsa }}</td>
                         <td class="text-center">
+                            {% if item.detailproduk__faktur_pembelian__no_faktur_pembelian is not None %}
                             <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.id_produk }}, {{ item.detailproduk__faktur_pembelian__no_faktur_pembelian }})"
                                     data-toggle="modal" id="edit" class="btn btn-success btn-sm">
                                 <i class="fas fa-edit"></i>
                             </button>
+                            {% else %}
+                            <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.id_produk }})"
+                                data-toggle="modal" id="edit" class="btn btn-success btn-sm">
+                            <i class="fas fa-edit"></i>
+                            </button>
+                            {% endif %}
                             <button type="button" title="delete" data-toggle="modal" data-target="#modal-delete"
-                                    onClick="deletePenjualan({{ item.id_produk }}, {{ item.detailproduk__faktur_pembelian__no_faktur_pembelian }})" class="btn btn-danger btn-sm">
+                                    onClick="deletePenjualan({{ item.id_produk }})" class="btn btn-danger btn-sm">
                                 <i class="far fa-trash-alt"></i>
                             </button>
                         </td>
@@ -151,7 +158,7 @@
                         <input type="number" name="kuantitas" data-toggle="tooltip" title="Stok" class="form-control form-control-lg form-custom" required="" id="id_kuantitas">
 
                         <label for="harga_satuan">Harga beli satuan:</label>
-                        <input type="number" step="10000" name="harga_satuan" class="form-control form-custom" required id="harga_satuan">
+                        <input type="number" step="1" name="harga_satuan" class="form-control form-custom" required id="harga_satuan">
 
                         <label for="tanggal_kadaluarsa">Tanggal kadaluarsa:</label>
                         <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal_kadaluarsa" required>
@@ -201,7 +208,7 @@
                         <input type="number" name="kuantitas" data-toggle="tooltip" title="Stok" class="form-control form-control-lg form-custom" required id="kuantitas">
 
                         <label for="harga-satuan">Harga beli satuan:</label>
-                        <input type="number" step="10000.0" name="harga_satuan" class="form-control form-custom" required id="harga-satuan">
+                        <input type="number" step="1" name="harga_satuan" class="form-control form-custom" required id="harga-satuan">
 
                         <label for="tanggal-kadaluarsa">Tanggal kadaluarsa:</label>
                         <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal-kadaluarsa" required>
@@ -287,9 +294,8 @@
     });
 
     // delete data
-    function deletePenjualan(id, id_pembelian) {
+    function deletePenjualan(id) {
         $('#delete-data').val(id);
-        $('#delete-pembelian').val(id_pembelian);
     }
 
     // update penjualan

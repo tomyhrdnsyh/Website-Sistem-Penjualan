@@ -76,16 +76,16 @@
                   </thead>
                   <tbody>
                   {% for item in table_pembelian %}
-                      <tr id="sale-{{ item.no_faktur_pembelian }}">
-                        <td>{{ item.no_faktur_pembelian }}</td>
-                        <td class="nama-konsumen">{{ item.petugas__distributor__nama_distributor }}</td>
-                        <td class="produk">{{ item.tanggal_pembelian }}</td>
-                        <td class="tanggal-jual">{{ item.detailfakturpembelian__produk__nama_produk }}</td>
+                      <tr id="pembelian-{{ item.no_faktur_pembelian }}{{ item.detailfakturpembelian__id_detail_faktur_pembelian }}{{ item.detailfakturpembelian__produk__id_produk }}">
+                        <td class="idbeli">{{ item.no_faktur_pembelian }}.{{ item.detailfakturpembelian__id_detail_faktur_pembelian }}.{{ item.detailfakturpembelian__produk__id_produk }}</td>
+                        <td class="nama-distributor">{{ item.petugas__distributor__nama_distributor }}</td>
+                        <td class="tanggal">{{ item.tanggal_pembelian }}</td>
+                        <td class="nama-produk">{{ item.detailfakturpembelian__produk__nama_produk }}</td>
                         <td class="kuantitas">{{ item.detailfakturpembelian__kuantitas }}</td>
                         <td class="harga">{{ item.detailfakturpembelian__harga_satuan }}</td>
-                        <td>{% widthratio item.detailfakturpembelian__kuantitas 1 item.detailfakturpembelian__harga_satuan %}</td>
+                        <td>{{ item.total }}</td>
                         <td class="text-center">
-                            <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.no_faktur_penjualan }})"
+                            <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan('{{ item.no_faktur_pembelian }}{{ item.detailfakturpembelian__id_detail_faktur_pembelian }}{{ item.detailfakturpembelian__produk__id_produk }}')"
                                     data-toggle="modal" id="edit" class="btn btn-success btn-sm">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -134,14 +134,7 @@
                         <label for="no_faktur_pembelian">Nama distributor:</label>
                         <select name="nama_distributor" class="form-control form-control-lg form-custom" id="no_faktur_pembelian">
                             {% for item in nama_distributor %}
-                           <option value="{{ item.nama_distributor }}">{{ item.nama_distributor }}</option>
-                            {% endfor %}
-                        </select>
-
-                        <label for="no_faktur_pembelian">Nama petugas:</label>
-                        <select name="nama_petugas" class="form-control form-control-lg form-custom" id="no_faktur_pembelian">
-                            {% for item in petugas %}
-                           <option value="{{ item.nama_petugas }}">{{ item.nama_petugas }}</option>
+                           <option value="{{ item.value }}">{{ item.option }}</option>
                             {% endfor %}
                         </select>
 
@@ -152,7 +145,7 @@
                         <label for="jenis_produk">Jenis Produk:</label>
                         <select name="nama_jenis_produk" class="form-control form-control-lg form-custom" id="jenis_produk">
                             {% for item in jenis_produk %}
-                           <option value="{{ item.nama_jenis_produk }}">{{ item.nama_jenis_produk }}</option>
+                           <option value="{{ item.value }}">{{ item.option }}</option>
                             {% endfor %}
                         </select>
 
@@ -163,7 +156,7 @@
                         <input type="number" name="kuantitas" data-toggle="tooltip" title="Stok" class="form-control form-control-lg form-custom" required="" id="id_kuantitas">
 
                         <label for="harga_satuan">Harga beli satuan:</label>
-                        <input type="number" step="10000" name="harga_satuan" class="form-control form-custom" required id="harga_satuan">
+                        <input type="number" step="1.0" name="harga_satuan" class="form-control form-custom" required id="harga_satuan">
 
                         <label for="tanggal_kadaluarsa">Tanggal kadaluarsa:</label>
                         <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal_kadaluarsa" required>
@@ -192,25 +185,35 @@
                     <form class="sales-form webform" method="POST">
                         {% csrf_token %}
                         <input name="id" type="hidden" id="edit-id">
-                        <label for="edit-tanggal">Tanggal jual:</label>
-                        <input name="tanggal_jual" type="date" class="form-control form-custom" data-toggle="tooltip" id="edit-tanggal" required>
-
-                        <label for="edit-konsumen">Nama konsumen:</label>
-                        <select name="konsumen" class="form-control form-control-lg form-custom" id="edit-konsumen">
-                            {% for item in konsumen_form %}
+                        <label for="distributor">Nama distributor:</label>
+                        <select name="nama_distributor" class="form-control form-control-lg form-custom" id="distributor">
+                            {% for item in nama_distributor %}
                            <option value="{{ item.value }}">{{ item.option }}</option>
                             {% endfor %}
                         </select>
 
-                        <label for="edit-produk">Pilih produk:</label>
-                        <select name="produk" class="form-control form-control-lg form-custom" id="edit-produk">
-                        {% for item in produk_form %}
-                        <option value="{{ item.value }}">{{ item.option }}</option>
-                        {% endfor %}
+                        <label for="tanggal-pembelian">Waktu beli:</label>
+                        <input name="tanggal_pembelian" type="date" class="form-control form-custom" id="tanggal-pembelian" required>
+
+
+                        <label for="jenis-produk">Jenis Produk:</label>
+                        <select name="nama_jenis_produk" class="form-control form-control-lg form-custom" id="jenis-produk">
+                            {% for item in jenis_produk %}
+                           <option value="{{ item.value }}">{{ item.option }}</option>
+                            {% endfor %}
                         </select>
 
-                        <label for="edit-kuantitas">Kuantitas:</label>
-                        <input name="kuantitas" type="number" class="form-control form-control-lg form-custom" id="edit-kuantitas" required>
+                        <label for="produk">Nama produk:</label>
+                        <input type="text" name="nama_produk" class="form-control form-custom" required id="produk">
+
+                        <label for="kuantitas">Kuantitas:</label>
+                        <input type="number" name="kuantitas" data-toggle="tooltip" title="Stok" class="form-control form-control-lg form-custom" required id="kuantitas">
+
+                        <label for="harga-satuan">Harga beli satuan:</label>
+                        <input type="number" step="1.0" name="harga_satuan" class="form-control form-custom" required id="harga-satuan">
+
+                        <label for="kadaluarsa">Tanggal kadaluarsa:</label>
+                        <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="kadaluarsa" required>
 
                         <button type="submit" class="form-control" style="margin-top: 2.3rem;" name="update" id="submit-button">Update</button>
                     </form>
@@ -296,19 +299,52 @@
         $('#delete-data').val(id);
     }
 
+    // get value from option select
+    function get_value(option, data) {
+        let value;
+        for (let i = 0; i < data.length; i++) {
+            if (option.toLowerCase() == data[i].option.toLowerCase()) {
+                value = data[i].value
+            }
+        }
+        return value;
+    }
+
+    function getJenisProduk(id, data) {
+        let result;
+        for (let i = 0; i < data.length; i++) {
+            if (id == data[i].id_produk) {
+                result =
+                {
+                    jenis: data[i].jenis_produk,
+                    kadaluwarsa : data[i].kadaluarsa
+                }
+            }
+        }
+        return result;
+    }
+
     // update penjualan
     function editPenjualan(id) {
-        tr_id = '#sale-' + id;
-        tgl_jual = formatDate($(tr_id).find(".tanggal-jual").text());
-        konsumen = $(tr_id).find(".nama-konsumen").text();
-        produk = $(tr_id).find(".produk").text();
-        kuantitas = $(tr_id).find(".kuantitas").text();
 
-        $('#edit-id').val(id);
-        $('#edit-tanggal').val(tgl_jual);
-        $('#edit-konsumen').val(konsumen);
-        $('#edit-produk').val(produk);
-        $('#edit-kuantitas').val(kuantitas);
+        tr_id = '#pembelian-' + id;
+        idbeli =$(tr_id).find(".idbeli").text();
+        distributor = $(tr_id).find(".nama-distributor").text();
+        waktu_beli =  formatDate($(tr_id).find(".tanggal").text());
+        produk = $(tr_id).find(".nama-produk").text();
+        kuantitas = $(tr_id).find(".kuantitas").text();
+        harga_beli = $(tr_id).find(".harga").text();
+
+        // get jenis produk from id faktur pembelian
+        nama_jenis_produk = getJenisProduk(id.slice(4), {{ modal_edit_jenis_produk|safe }} )
+        $('#edit-id').val(idbeli);
+        $('#distributor').val(get_value(distributor, {{ nama_distributor|safe }}));
+        $('#tanggal-pembelian').val(waktu_beli);
+        $('#jenis-produk').val(get_value(nama_jenis_produk.jenis, {{ jenis_produk|safe }}));
+        $('#produk').val(produk);
+        $('#kuantitas').val(kuantitas);
+        $('#harga-satuan').val(harga_beli);
+        $('#kadaluarsa').val(nama_jenis_produk.kadaluwarsa);
     }
 
     // datetime convert

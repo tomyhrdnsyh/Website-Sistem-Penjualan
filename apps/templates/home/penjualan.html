@@ -85,7 +85,7 @@
                         <td class="tanggal-jual">{{ item.tanggal_jual }}</td>
                         <td class="kuantitas">{{ item.detailfakturpenjualan__kuantitas }}</td>
                         <td class="harga">{{ item.detailfakturpenjualan__produk__detailproduk__harga_jual_satuan }}</td>
-                        <td>{% widthratio item.detailfakturpenjualan__kuantitas 1 item.detailfakturpenjualan__produk__detailproduk__harga_jual_satuan %}</td>
+                        <td>{{ item.total }}</td>
                         <td class="text-center">
                             <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.no_faktur_penjualan }})"
                                     data-toggle="modal" id="edit" class="btn btn-success btn-sm">
@@ -136,14 +136,14 @@
                         {{ form_penjualan }}
 
                         <label for="id_konsumen">Nama konsumen:</label>
-                        <select name="konsumen" class="form-control form-control-lg form-custom" id="id_konsumen">
+                        <select name="id_konsumen" class="form-control form-control-lg form-custom" id="id_konsumen">
                             {% for item in konsumen_form %}
                            <option value="{{ item.value }}">{{ item.option }}</option>
                             {% endfor %}
                         </select>
 
                         <label for="id_produk">Pilih produk:</label>
-                        <select name="produk" class="form-control form-control-lg form-custom" id="id_produk">
+                        <select name="id_produk" class="form-control form-control-lg form-custom" id="id_produk">
                             {% for item in produk_form %}
                            <option value="{{ item.value }}">{{ item.option }}</option>
                             {% endfor %}
@@ -176,6 +176,7 @@
                     <form class="sales-form webform" method="POST">
                         {% csrf_token %}
                         <input name="id" type="hidden" id="edit-id">
+                        <input name="harga_sebelum" type="hidden" id="harga-sebelum">
                         <label for="edit-tanggal">Tanggal jual:</label>
                         <input name="tanggal_jual" type="date" class="form-control form-custom" data-toggle="tooltip" id="edit-tanggal" required>
 
@@ -280,6 +281,17 @@
         $('#delete-data').val(id);
     }
 
+    // get value from option select
+    function get_value(option, data) {
+        let value;
+        for (let i = 0; i < data.length; i++) {
+            if (option.toLowerCase() == data[i].option.toLowerCase()) {
+                value = data[i].value
+            }
+        }
+        return value;
+    }
+
     // update penjualan
     function editPenjualan(id) {
         tr_id = '#sale-' + id;
@@ -288,11 +300,15 @@
         produk = $(tr_id).find(".produk").text();
         kuantitas = $(tr_id).find(".kuantitas").text();
 
+        data_konsumen = {{ konsumen_form|safe }};
+        data_produk = {{ produk_form|safe }};
+
         $('#edit-id').val(id);
         $('#edit-tanggal').val(tgl_jual);
-        $('#edit-konsumen').val(konsumen);
-        $('#edit-produk').val(produk);
+        $('#edit-konsumen').val(get_value(konsumen, data_konsumen));
+        $('#edit-produk').val(get_value(produk, data_produk));
         $('#edit-kuantitas').val(kuantitas);
+        $('#harga-sebelum').val(kuantitas);
     }
 
     // datetime convert
