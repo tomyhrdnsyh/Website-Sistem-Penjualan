@@ -1,6 +1,6 @@
 {% extends "layouts/base-fullscreen.html" %}
 {% load static %}
-{% block title %} Export Penjualan {% endblock %}
+{% block title %} Export Distributor {% endblock %}
 {% block stylesheets %}
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -29,7 +29,7 @@
                 <!-- /.card -->
                 <div class="card">
                   <div class="card-header">
-                      <h3 class="card-title">Tabel Penjualan</h3>
+                      <h3 class="card-title">Tabel Distributor</h3>
                   </div>
                   <!-- /.card-header -->
                   <div class="card-body">
@@ -37,26 +37,18 @@
                       <thead>
                       <tr>
                         <th>ID</th>
-                        <th>Nama Konsumen</th>
+                        <th>Nama Distributor</th>
+                        <th>Nomor Hp</th>
                         <th>Alamat</th>
-                        <th>Produk</th>
-                        <th>Tanggal</th>
-                        <th>Kuantitas</th>
-                        <th>Harga Jual (IDR)</th>
-                        <th>Total (IDR)</th>
                       </tr>
                       </thead>
                       <tbody>
-                      {% for item in penjualan %}
-                          <tr id="sale-{{ item.no_faktur_penjualan }}">
-                            <td>{{ item.no_faktur_penjualan }}</td>
-                            <td>{{ item.konsumen__nama_konsumen }}</td>
-                            <td>{{ item.konsumen__alamat_konsumen }}</td>
-                            <td>{{ item.detailfakturpenjualan__produk__nama_produk }}</td>
-                            <td>{{ item.tanggal_jual }}</td>
-                            <td>{{ item.detailfakturpenjualan__kuantitas }}</td>
-                            <td>{{ item.detailfakturpenjualan__produk__detailproduk__harga_jual_satuan }}</td>
-                            <td>{% widthratio item.detailfakturpenjualan__kuantitas 1 item.detailfakturpenjualan__produk__detailproduk__harga_jual_satuan %}</td>
+                      {% for item in distributor %}
+                          <tr>
+                            <td>{{ item.id_distributor }}</td>
+                            <td class="nama-distributor">{{ item.nama_distributor }}</td>
+                            <td class="no-telpon">{{ item.no_telepon }}</td>
+                            <td class="alamat">{{ item.alamat_distributor }}</td>
                           </tr>
                       {% endfor %}
                       </tbody>
@@ -81,7 +73,7 @@
         window.print();
     }
     setTimeout(function (){
-        window.location.replace('/penjualan.html');
+        window.location.replace('/distributor.html');
     }, 1000)
 </script>
 {% endblock %}

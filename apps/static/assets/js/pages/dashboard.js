@@ -188,8 +188,8 @@ $(function () {
     labels: penjualan_labels_pie,
     datasets: [
       {
-        data: penjualan_data,
-        backgroundColor: penjualan_data.map(getRandomColor)
+        data: penjualan_data_pie,
+        backgroundColor: penjualan_data_pie.map(getRandomColor)
       }
     ]
   }

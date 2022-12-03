@@ -30,7 +30,7 @@ ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets')
 # X_FRAME_OPTIONS = 'ALLOW-FROM *'
 
 # load production server from .env
-ALLOWED_HOSTS = ['localhost', 'localhost:85', '127.0.0.1',               env('SERVER', default='127.0.0.1') ]
+ALLOWED_HOSTS = ['localhost', 'localhost:85', '*', '127.0.0.1', env('SERVER', default='127.0.0.1') ]
 CSRF_TRUSTED_ORIGINS = ['http://localhost:85', 'http://127.0.0.1', 'https://' + env('SERVER', default='127.0.0.1') ]
 
 
@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apps.home'  # Enable the inner home (home)
+    'apps.home',  # Enable the inner home (home)
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -72,7 +73,7 @@ JAZZMIN_SETTINGS = {
             {"name": "View Site",  "url": "/", "permissions": ["auth.view_user"]},
 
             # external url that opens in a new window (Permissions can be added)
-            {"name": "Support", "url": "https://github.com/tomyhrdnsyh", "new_window": True},
+            # {"name": "Support", "url": "https://github.com/tomyhrdnsyh", "new_window": True},
 
             # model admin to link to (Permissions checked against model)
             {"model": "auth.User"},

@@ -25,7 +25,7 @@ class CustomUserAdmin(UserAdmin):
             }
         )
     )
-    list_display = ('id_pengguna', 'username', 'email', 'first_name', 'last_name', 'no_hp_pengguna', )
+    list_display = ('id_pengguna', 'username', 'no_hp_pengguna')
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
