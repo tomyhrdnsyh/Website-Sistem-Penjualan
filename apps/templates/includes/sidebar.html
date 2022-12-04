@@ -63,6 +63,7 @@
                   <p>Penjualan</p>
                 </a>
               </li>
+              {% if user.is_superuser %}
               <li class="nav-item">
                 <a href="/distributor.html" class="nav-link {% if 'distributor' in segment %} active {% endif %}">
                   <i class="fas fa-truck nav-icon"></i>
@@ -75,6 +76,7 @@
                   <p>Pengaturan</p>
                 </a>
               </li>
+              {% endif %}
               
             </ul>
           </li>          

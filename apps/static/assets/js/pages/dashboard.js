@@ -91,15 +91,6 @@ $(function () {
     }
   })
 
-  // Sparkline charts
-  // var sparkline1 = new Sparkline($('#sparkline-1')[0], { width: 80, height: 50, lineColor: '#92c1dc', endColor: '#ebf4f9' })
-  // var sparkline2 = new Sparkline($('#sparkline-2')[0], { width: 80, height: 50, lineColor: '#92c1dc', endColor: '#ebf4f9' })
-  // var sparkline3 = new Sparkline($('#sparkline-3')[0], { width: 80, height: 50, lineColor: '#92c1dc', endColor: '#ebf4f9' })
-  //
-  // sparkline1.draw([1000, 1200, 920, 927, 931, 1027, 819, 930, 1021])
-  // sparkline2.draw([515, 519, 520, 522, 652, 810, 370, 627, 319, 630, 921])
-  // sparkline3.draw([15, 19, 20, 22, 33, 27, 31, 27, 19, 30, 21])
-
   // The Calender
   $('#calendar').datetimepicker({
     format: 'L',
@@ -123,7 +114,7 @@ $(function () {
         label: 'Penjualan',
         backgroundColor: 'rgba(60,141,188,0.9)',
         borderColor: 'rgba(60,141,188,0.8)',
-        pointRadius: false,
+        pointRadius: 5,
         pointColor: '#3b8bba',
         pointStrokeColor: 'rgba(60,141,188,1)',
         pointHighlightFill: '#fff',
@@ -251,7 +242,7 @@ $(function () {
       }],
       yAxes: [{
         ticks: {
-          stepSize: 5000000,
+          stepSize: 500000,
           fontColor: '#efefef'
         },
         gridLines: {

@@ -54,9 +54,11 @@
               <div class="card-header">
                   <h3 class="card-title">Tabel Produk</h3>
                   <div class="float-sm-right">
+                      {% if user.is_superuser %}
                       <button type="button" title="tambah data" data-toggle="modal" data-target="#modal-lg" class="btn btn-success">Tambah Data</button>
-                      <a href="/pdf-product.html" class="btn btn-warning">Export to PDF</a>
-                      <button type="button" title="export to excel" id="exportexcel" data-toggle="tooltip" class="btn btn-info">Export to Excel</button>
+                      {% endif %}
+                      <a href="/pdf-product.html" class="btn btn-warning">Cetak PDF</a>
+                      <button type="button" title="Cetak excel" id="exportexcel" data-toggle="tooltip" class="btn btn-info">Cetak Excel</button>
                   </div>
               </div>
               <!-- /.card-header -->
@@ -163,7 +165,7 @@
                         <label for="tanggal_kadaluarsa">Tanggal kadaluarsa:</label>
                         <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal_kadaluarsa" required>
 
-                        <button type="submit" class="form-control" style="margin-top: 2.3rem;" id="submit-button">Submit Button</button>
+                        <button type="submit" class="form-control" style="margin-top: 2.3rem;" id="submit-button">Tambah Produk</button>
                     </form>
                 </div>
               </div>
@@ -213,7 +215,7 @@
                         <label for="tanggal-kadaluarsa">Tanggal kadaluarsa:</label>
                         <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal-kadaluarsa" required>
 
-                        <button type="submit" class="form-control" style="margin-top: 2.3rem;" name="update" id="submit-button">Update</button>
+                        <button type="submit" class="form-control" style="margin-top: 2.3rem;" name="update" id="submit-button">Edit Produk</button>
                     </form>
                 </div>
               </div>
