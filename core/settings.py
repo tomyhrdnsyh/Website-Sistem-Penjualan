@@ -66,11 +66,11 @@ JAZZMIN_SETTINGS = {
     "site_brand": "BUDI JAYA TANI",
     "site_header": "Budi Jaya Tani",
     "site_logo": "img/WebsiteLogo.png",
-    "copyright": "Thomas Shelby",
+    "copyright": "Budi Jaya Tani",
     "topmenu_links": [
 
             # Url that gets reversed (Permissions can be added)
-            {"name": "View Site",  "url": "/", "permissions": ["auth.view_user"]},
+            {"name": "Halaman Utama",  "url": "/", "permissions": ["auth.view_user"]},
 
             # external url that opens in a new window (Permissions can be added)
             # {"name": "Support", "url": "https://github.com/tomyhrdnsyh", "new_window": True},

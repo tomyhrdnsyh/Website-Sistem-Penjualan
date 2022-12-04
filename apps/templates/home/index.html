@@ -113,7 +113,11 @@
               <div class="icon">
                 <i class="ion ion-person-add"></i>
               </div>
+              {% if user.is_superuser %}
               <a href="/distributor.html" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+              {% else %}
+              <a href="#" class="small-box-footer">Detail <i class="fas fa-arrow-circle-right"></i></a>
+              {% endif %}
             </div>
           </div>
           <!-- ./col -->
