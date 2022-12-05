@@ -6,7 +6,7 @@
 {% block body_class %} login-page bg-image{% endblock body_class %}
 
 {% block body_style %}
-    background-image: url('https://bisnismuda.id/assets/content/20220324112434000000BeginiStrategiJualanOnlineUMKMAlaNataCoffeeIllustrationBisnisMuda5.jpg');
+    background-image: url('https://media.istockphoto.com/id/516180836/id/foto/nasi-hijau-fild-dengan-langit-malam.jpg?b=1&s=612x612&w=0&k=20&c=lrIDIt2ogA416vLvLGUNAk9rLD0p_uv9wly679rMmS4=');
     height: 100vh;
     background-position: center;
     background-repeat: no-repeat;
@@ -34,7 +34,7 @@
   <div class="login-box">
 
     <div class="login-logo">
-        <a target="_blank" rel="noopener noreferrer">Welcome to the <br> <b>Budi Jaya Tani</b></a>
+        <a target="_blank" rel="noopener noreferrer">Selamat datang<br> <b>Budi Jaya Tani</b></a>
     </div>
 
     <!-- /.login-logo -->
@@ -45,7 +45,7 @@
             {% if msg %}
               <span class="text-danger"> {{ msg | safe }} </span>
             {% else %}
-                Add your credentials
+                Input kredensial anda
             {% endif %}
         </p>
 
@@ -74,13 +74,13 @@
               <div class="icheck-primary">
                 <input type="checkbox" id="remember">
                 <label for="remember">
-                  Remember Me
+                  Ingat saya
                 </label>
               </div>
             </div>
             <!-- /.col -->
             <div class="col-4">
-              <button type="submit" name="login" class="btn btn-primary btn-block">Sign In</button>
+              <button type="submit" name="login" class="btn btn-primary btn-block">Masuk</button>
             </div>
             <!-- /.col -->
           </div>
@@ -89,7 +89,7 @@
         <br /><br />
 
         <div class="text-center">
-            Not a member? <a href="{% url 'register' %}" class="text-center">Register</a>
+            Belum punya akun? <a href="{% url 'register' %}" class="text-center">Mendaftar</a>
             <br />
             <br />
         </div>

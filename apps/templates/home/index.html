@@ -128,7 +128,35 @@
           <!-- Left col -->
           <section class="col-lg-6 connectedSortable">
             <!-- Custom tabs (Charts with tabs)-->
-            <div class="card">
+            <div class="card bg-gradient-info">
+              <div class="card-header border-0">
+                <h3 class="card-title">
+                  <i class="fas fa-th mr-1"></i>
+                  Pembelian
+                </h3>
+
+                <div class="card-tools">
+                  <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                  <button type="button" class="btn bg-info btn-sm" data-card-widget="remove">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <canvas class="chart" id="line-chart" style="min-height: 250px; height: 363px; max-height: 363px; max-width: 100%;"></canvas>
+              </div>
+              <!-- /.card-body -->
+
+            </div>
+            <!-- /.card -->
+
+          </section>
+          <!-- /.Left col -->
+          <!-- right col (We are only adding the ID to make the widgets sortable)-->
+          <section class="col-lg-6 connectedSortable">
+              <div class="card">
               <div class="card-header">
                 <h3 class="card-title">
                   <i class="fas fa-chart-pie mr-1"></i>
@@ -158,36 +186,8 @@
                 </div>
               </div><!-- /.card-body -->
             </div>
-            <!-- /.card -->
-
-          </section>
-          <!-- /.Left col -->
-          <!-- right col (We are only adding the ID to make the widgets sortable)-->
-          <section class="col-lg-6 connectedSortable">
-
             <!-- solid sales graph -->
-            <div class="card bg-gradient-info">
-              <div class="card-header border-0">
-                <h3 class="card-title">
-                  <i class="fas fa-th mr-1"></i>
-                  Pembelian
-                </h3>
 
-                <div class="card-tools">
-                  <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                  <button type="button" class="btn bg-info btn-sm" data-card-widget="remove">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-body">
-                <canvas class="chart" id="line-chart" style="min-height: 250px; height: 363px; max-height: 363px; max-width: 100%;"></canvas>
-              </div>
-              <!-- /.card-body -->
-
-            </div>
             <!-- /.card -->
 
           </section>

@@ -51,7 +51,7 @@
                       <tbody>
                       {% for item in table_pembelian %}
                           <tr>
-                            <td class="idbeli">{{ item.no_faktur_pembelian }}</td>
+                            <td class="idbeli">FB{{ item.no_faktur_pembelian }}.DFB{{ item.detailfakturpembelian__id_detail_faktur_pembelian }}.P{{ item.detailfakturpembelian__produk__id_produk }}</td>
                             <td class="nama-distributor">{{ item.petugas__distributor__nama_distributor }}</td>
                             <td class="tanggal">{{ item.tanggal_pembelian }}</td>
                             <td class="nama-produk">{{ item.detailfakturpembelian__produk__nama_produk }}</td>

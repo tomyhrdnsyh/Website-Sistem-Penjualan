@@ -13,6 +13,7 @@ from .form import Penjualan, FormDistributor
 from datetime import datetime
 from django.shortcuts import redirect
 import pandas as pd
+import re
 
 
 def normalisasi_harga_jual(nama_produk: str, jenis_produk: str):
@@ -159,8 +160,9 @@ def pages(request):
         context['penjualan'] = sales
         # End tabel penjualan
         if request.POST:
+            id_global = re.findall(r'\d+', request.POST.get('id'))
             if 'update' in request.POST:
-                penjualan = FakturPenjualan.objects.get(no_faktur_penjualan=request.POST.get('id'))
+                penjualan = FakturPenjualan.objects.get(no_faktur_penjualan=id_global[0])
                 penjualan.konsumen = Konsumen.objects.get(id_konsumen=request.POST.get('konsumen'))
                 penjualan.tanggal_jual = request.POST.get('tanggal_jual')
                 penjualan.save()
@@ -185,7 +187,7 @@ def pages(request):
                 update_stok.save()
 
             elif 'delete' in request.POST:
-                penjualan = FakturPenjualan.objects.get(no_faktur_penjualan=request.POST.get('id'))
+                penjualan = FakturPenjualan.objects.get(no_faktur_penjualan=id_global[0])
                 penjualan.delete()
 
             else:
@@ -258,7 +260,7 @@ def pages(request):
 
             elif 'update' in request.POST:
 
-                id_global = request.POST.get('id').split('.')
+                id_global = re.findall(r'\d+', request.POST.get('id'))
 
                 update_pemblian = FakturPembelian.objects.get(no_faktur_pembelian=id_global[0])
                 update_pemblian.tanggal_pembelian = request.POST.get('tanggal_pembelian')
@@ -281,7 +283,8 @@ def pages(request):
                 update_detail_produk.tanggal_kadaluarsa = request.POST.get('tanggal_kadaluarsa')
                 update_detail_produk.save()
 
-                update_harga_jual_to_database(request.POST.get('nama_produk'), request.POST.get('nama_jenis_produk'))
+                jenis_produk = JenisProduk.objects.get(id_jenis_produk=request.POST.get('nama_jenis_produk'))
+                update_harga_jual_to_database(request.POST.get('nama_produk'), jenis_produk.nama_jenis_produk)
 
             else:
 
@@ -341,12 +344,13 @@ def pages(request):
         context['produk'] = produk
 
         if request.POST:
+            id_global = re.findall(r'\d+', request.POST.get('id'))
             if 'delete' in request.POST:
-                delete_produk = Produk.objects.get(id_produk=request.POST.get('id'))
+                delete_produk = Produk.objects.get(id_produk=id_global[0])
                 delete_produk.delete()
 
             elif 'update' in request.POST:
-                produk = Produk.objects.get(id_produk=request.POST.get('id'))
+                produk = Produk.objects.get(id_produk=id_global[0])
                 produk.nama_produk = request.POST.get('nama_produk')
                 produk.jenis_produk = JenisProduk.objects.get(nama_jenis_produk=request.POST.get('jenis_produk'))
                 produk.save()

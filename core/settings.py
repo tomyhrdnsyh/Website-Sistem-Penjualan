@@ -4,7 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 import os, environ
-
+from django.utils.translation import gettext_lazy as _
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, True)
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    "django.middleware.locale.LocaleMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -63,6 +64,7 @@ MIDDLEWARE = [
 
 JAZZMIN_SETTINGS = {
     "site_title": "Budi Jaya Tani",
+
     "site_brand": "BUDI JAYA TANI",
     "site_header": "Budi Jaya Tani",
     "site_logo": "img/WebsiteLogo.png",
@@ -78,6 +80,7 @@ JAZZMIN_SETTINGS = {
             # model admin to link to (Permissions checked against model)
             {"model": "auth.User"},
         ],
+    "language_chooser": True,
 
 }
 
@@ -142,6 +145,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
+
+LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
+
+LANGUAGES = [
+    ('en', _('English')),
+    ('id', _('Indonesian')),
+]
 
 TIME_ZONE = 'Asia/Jakarta'
 

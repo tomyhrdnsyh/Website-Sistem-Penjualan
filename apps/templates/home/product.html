@@ -79,7 +79,7 @@
                   {% for item in produk %}
                       <tr id="produk-{{ item.id_produk }}">
 
-                        <td>{{ item.id_produk }}</td>
+                        <td>P{{ item.id_produk }}</td>
                         <td class="nama-produk">{{ item.nama_produk }}</td>
                         <td class="harga-beli">{{ item.detailfakturpembelian__harga_satuan }}</td>
                         <td class="stok">{{ item.detailproduk__stok }}</td>
@@ -230,18 +230,18 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h4 class="modal-title mb-3">Delete</h4>
+              <h4 class="modal-title mb-3">Hapus Produk</h4>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you wont to remove this data? Data cannot be recovered once delete.</p>
+                <p>Apakah Anda yakin ingin menghapus data ini? Data tidak dapat dipulihkan setelah dihapus.</p>
                 <form method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="id" id="delete-data">
                     <input type="hidden" name="no_faktur_pembelian" id="delete-pembelian">
-                    <button type="submit" name="delete" class="btn btn-danger float-sm-right">Yes, i'm Sure</button>
+                    <button type="submit" name="delete" class="btn btn-danger float-sm-right">Ya, saya yakin</button>
                 </form>
 
             </div>
