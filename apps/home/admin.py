@@ -16,11 +16,11 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = (
         *UserAdmin.fieldsets,
         (
-            'Additional Info',
+            'Informasi lain',
             {
                 'fields': (
                     'no_hp_pengguna',
-                    'nama_pengguna',
+                    'nama_lengkap',
                 )
             }
         )
@@ -74,7 +74,7 @@ class SalesInvoiceAdmin(admin.ModelAdmin):
 
 @admin.register(DetailFakturPenjualan)
 class SalesInvoiceDetailAdmin(admin.ModelAdmin):
-    list_display = ("faktur_penjualan", "produk", "kuantitas")
+    list_display = ("faktur_penjualan", "produk", "kuantitas", "jumlah_produk")
 
 
 @admin.register(Konsumen)

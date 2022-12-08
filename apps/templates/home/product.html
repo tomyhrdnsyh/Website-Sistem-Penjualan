@@ -81,7 +81,7 @@
 
                         <td>P{{ item.id_produk }}</td>
                         <td class="nama-produk">{{ item.nama_produk }}</td>
-                        <td class="harga-beli">{{ item.detailfakturpembelian__harga_satuan }}</td>
+                        <td class="harga-beli">{{ item.detailfakturpembelian__harga_satuan|floatformat:"0" }}</td>
                         <td class="stok">{{ item.detailproduk__stok }}</td>
                         <td class="jenis">{{ item.jenis_produk__nama_jenis_produk }}</td>
                         <td class="kadaluarsa">{{ item.detailproduk__tanggal_kadaluarsa }}</td>
@@ -105,15 +105,6 @@
                       </tr>
                   {% endfor %}
                   </tbody>
-{#                  <tfoot>#}
-{#                  <tr>#}
-{#                    <th>Rendering engine</th>#}
-{#                    <th>Browser</th>#}
-{#                    <th>Platform(s)</th>#}
-{#                    <th>Engine version</th>#}
-{#                    <th>CSS grade</th>#}
-{#                  </tr>#}
-{#                  </tfoot>#}
                 </table>
               </div>
               <!-- /.card-body -->

@@ -30,10 +30,24 @@
     <section class="content-header">
       <div class="container-fluid">
         <div class="row mb-2">
-          <div class="col-sm-6">
+          <div class="col-sm-3">
             <h1>Penjualan</h1>
           </div>
           <div class="col-sm-6">
+              {% if messages %}
+                {% for message in messages %}
+                <div class="text-center">
+                  <div class="alert {{ message.tags }} alert-dismissible" role="alert" >
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="True">&times;</span>
+                    </button>
+                    {{ message }}
+                  </div>
+                </div>
+                {% endfor %}
+              {% endif %}
+          </div>
+          <div class="col-sm-3">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
               <li class="breadcrumb-item active">Penjualan</li>
@@ -78,13 +92,13 @@
                   <tbody>
                   {% for item in penjualan %}
                       <tr id="sale-{{ item.no_faktur_penjualan }}">
-                        <td>FJ{{ item.no_faktur_penjualan }}</td>
+                        <td>FJ{{ item.no_faktur_penjualan }}.P{{ item.detailfakturpenjualan__produk__id_produk }}</td>
                         <td class="nama-konsumen">{{ item.konsumen__nama_konsumen }}</td>
                         <td>{{ item.konsumen__alamat_konsumen }}</td>
                         <td class="produk">{{ item.detailfakturpenjualan__produk__nama_produk }}</td>
                         <td class="tanggal-jual">{{ item.tanggal_jual }}</td>
                         <td class="kuantitas">{{ item.detailfakturpenjualan__kuantitas }}</td>
-                        <td class="harga">{{ item.detailfakturpenjualan__produk__detailproduk__harga_jual_satuan }}</td>
+                        <td class="harga">{{ item.harga_jual }}</td>
                         <td>{{ item.total }}</td>
                         <td class="text-center">
                             <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.no_faktur_penjualan }})"
@@ -99,15 +113,6 @@
                       </tr>
                   {% endfor %}
                   </tbody>
-{#                  <tfoot>#}
-{#                  <tr>#}
-{#                    <th>Rendering engine</th>#}
-{#                    <th>Browser</th>#}
-{#                    <th>Platform(s)</th>#}
-{#                    <th>Engine version</th>#}
-{#                    <th>CSS grade</th>#}
-{#                  </tr>#}
-{#                  </tfoot>#}
                 </table>
               </div>
               <!-- /.card-body -->
@@ -138,7 +143,7 @@
                         <label for="id_konsumen">Nama konsumen:</label>
                         <select name="id_konsumen" class="form-control form-control-lg form-custom" id="id_konsumen">
                             {% for item in konsumen_form %}
-                           <option value="{{ item.value }}">{{ item.option }}</option>
+                           <option value="{{ item.value }}">NK{{ item.value }} {{ item.option }}</option>
                             {% endfor %}
                         </select>
 
@@ -150,7 +155,7 @@
                         </select>
 
                         <label for="id_kuantitas">Kuantitas:</label>
-                        <input type="number" name="kuantitas" class="form-control form-control-lg form-custom" required="" id="id_kuantitas">
+                        <input type="number" min="1" name="kuantitas" class="form-control form-control-lg form-custom" required="" id="id_kuantitas">
 
                         <button type="submit" class="form-control" style="margin-top: 2.3rem;" id="submit-button">Tambah Penjualan</button>
                     </form>
@@ -176,14 +181,14 @@
                     <form class="sales-form webform" method="POST">
                         {% csrf_token %}
                         <input name="id" type="hidden" id="edit-id">
-                        <input name="harga_sebelum" type="hidden" id="harga-sebelum">
+                        <input name="kuantitas_sebelum" type="hidden" id="kuantitas-sebelum">
                         <label for="edit-tanggal">Tanggal jual:</label>
                         <input name="tanggal_jual" type="date" class="form-control form-custom" data-toggle="tooltip" id="edit-tanggal" required>
 
                         <label for="edit-konsumen">Nama konsumen:</label>
                         <select name="konsumen" class="form-control form-control-lg form-custom" id="edit-konsumen">
                             {% for item in konsumen_form %}
-                           <option value="{{ item.value }}">{{ item.option }}</option>
+                           <option value="{{ item.value }}">NK{{ item.value }} {{ item.option }}</option>
                             {% endfor %}
                         </select>
 
@@ -222,6 +227,7 @@
                 <form method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="id" id="delete-data">
+                    <input type="hidden" name="kuantitas" id="kuantitas">
                     <button type="submit" name="delete" class="btn btn-danger float-sm-right">Ya, saya yakin</button>
                 </form>
 
@@ -278,7 +284,11 @@
 
     // delete data
     function deletePenjualan(id) {
+        tr_id = '#sale-' + id;
+        kuantitas = $(tr_id).find(".kuantitas").text();
+        $('#kuantitas').val(kuantitas);
         $('#delete-data').val(id);
+
     }
 
     // get value from option select
@@ -308,7 +318,7 @@
         $('#edit-konsumen').val(get_value(konsumen, data_konsumen));
         $('#edit-produk').val(get_value(produk, data_produk));
         $('#edit-kuantitas').val(kuantitas);
-        $('#harga-sebelum').val(kuantitas);
+        $('#kuantitas-sebelum').val(kuantitas);
     }
 
     // datetime convert

@@ -4,6 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 import os, environ
+from django.contrib.messages import constants as messages
 from django.utils.translation import gettext_lazy as _
 env = environ.Env(
     # set casting, default value
@@ -80,9 +81,22 @@ JAZZMIN_SETTINGS = {
             # model admin to link to (Permissions checked against model)
             {"model": "auth.User"},
         ],
-    "language_chooser": True,
+    # "language_chooser": True,
 
 }
+
+JAZZMIN_UI_TWEAKS = {
+    "footer_small_text": False,
+    "footer_fixed": True,
+}
+
+MESSAGE_TAGS = {
+        messages.DEBUG: 'alert-secondary',
+        messages.INFO: 'alert-info',
+        messages.SUCCESS: 'alert-success',
+        messages.WARNING: 'alert-warning',
+        messages.ERROR: 'alert-danger',
+ }
 
 ROOT_URLCONF = 'core.urls'
 LOGIN_REDIRECT_URL = "home"  # Route defined in home/urls.py

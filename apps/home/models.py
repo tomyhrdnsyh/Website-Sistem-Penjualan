@@ -11,7 +11,7 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
 
     id_pengguna = models.AutoField(primary_key=True)
-    nama_pengguna = models.CharField(max_length=100, null=True)
+    nama_lengkap = models.CharField(max_length=100, null=True)
     no_hp_pengguna = models.CharField(max_length=20, null=True)
 
     class Meta:
@@ -156,9 +156,10 @@ class DetailFakturPenjualan(models.Model): # detail faktur penjualan
     id_detail_faktur_penjualan = models.AutoField(primary_key=True)
     faktur_penjualan = models.ForeignKey(FakturPenjualan, on_delete=models.CASCADE,
                                          db_column='no_faktur_penjualan')
-    produk = models.ForeignKey(Produk, on_delete=models.CASCADE,
+    produk = models.ForeignKey(Produk, on_delete=models.CASCADE, null=True,
                                db_column='id_produk')
     kuantitas = models.IntegerField()
+    jumlah_produk = models.CharField(max_length=250, null=True)
 
     def __str__(self):
         return str(self.produk)

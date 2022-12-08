@@ -12,29 +12,34 @@ from .models import *
 from .form import Penjualan, FormDistributor
 from datetime import datetime
 from django.shortcuts import redirect
+from django.contrib import messages
 import pandas as pd
 import re
+import numpy as np
 
 
 def normalisasi_harga_jual(nama_produk: str, jenis_produk: str):
-    detail_produk = DetailProduk.objects.\
+    detail_produk = DetailProduk.objects. \
         filter(produk__nama_produk=nama_produk,
-               produk__jenis_produk__nama_jenis_produk=jenis_produk).\
-        values('id_detail_produk', 'produk__nama_produk', 'tanggal_kadaluarsa', 'produk__detailfakturpembelian__harga_satuan')
+               produk__jenis_produk__nama_jenis_produk=jenis_produk). \
+        values('id_detail_produk', 'produk__nama_produk', 'tanggal_kadaluarsa',
+               'produk__detailfakturpembelian__harga_satuan')
     df = pd.DataFrame(detail_produk)
     df.tanggal_kadaluarsa = [item.year for item in df.tanggal_kadaluarsa]
     df_groupby = df.groupby(['produk__nama_produk', 'tanggal_kadaluarsa']).mean()
     dd_raw_detail_produk = defaultdict(lambda: defaultdict(float))
     for index, rows in df_groupby.iterrows():
         dd_raw_detail_produk[index[0]][index[1]] = rows.produk__detailfakturpembelian__harga_satuan
-
+    print(dd_raw_detail_produk)
     dd_clean_detail_produk = defaultdict(lambda: defaultdict(list))
     for produk, tahun_harga in dd_raw_detail_produk.items():
         n, steps = len(tahun_harga), []
         for tahun, harga_beli in tahun_harga.items():
             step = 0 if not steps else tahun - steps[-1]
             hj = (harga_beli * (step * 0.1 / n) + harga_beli)  # rumus harga jual = hb × bobot + hb
+
             hjp = hj * 0.2 + hj  # rumus hjp = hj * margin + hj; margin = 0.2
+            print(hjp)
             dd_clean_detail_produk[produk][tahun] = [harga_beli, hjp]
             steps.append(tahun)
 
@@ -44,7 +49,6 @@ def normalisasi_harga_jual(nama_produk: str, jenis_produk: str):
             for item in detail_produk:
                 if key == item['produk__nama_produk'] and tahun == item['tanggal_kadaluarsa'].year:
                     output[item['id_detail_produk']] = harga[-1]
-
     return output
 
 
@@ -82,11 +86,14 @@ def index(request):
     # =================== chart pembelian =================
 
     # query database
-    purchase_invoice = FakturPembelian.objects.order_by('tanggal_pembelian').values('tanggal_pembelian', 'detailfakturpembelian__harga_satuan', 'detailfakturpembelian__kuantitas')
+    purchase_invoice = FakturPembelian.objects.order_by('tanggal_pembelian').values('tanggal_pembelian',
+                                                                                    'detailfakturpembelian__harga_satuan',
+                                                                                    'detailfakturpembelian__kuantitas')
 
     raw_pembelian = defaultdict(list)
     for item in purchase_invoice:
-        raw_pembelian[item['tanggal_pembelian']].append(item['detailfakturpembelian__harga_satuan'] * item['detailfakturpembelian__kuantitas'])
+        raw_pembelian[item['tanggal_pembelian']].append(
+            item['detailfakturpembelian__harga_satuan'] * item['detailfakturpembelian__kuantitas'])
 
     pembelian_data = [sum(item) for item in raw_pembelian.values()]
     pembelian_labels = [datetime.strftime(item, "%d-%m-%y") for item in raw_pembelian.keys()]
@@ -131,10 +138,24 @@ def pages(request):
     # ====== MENU PENJUALAN ======
     if load_template == 'penjualan.html' or load_template == 'pdf-penjualan.html':
         # form modal
-        konsumen_choice = [{'value': item['id_konsumen'], 'option': item['nama_konsumen'].title()}
-                           for item in Konsumen.objects.values('nama_konsumen', 'id_konsumen')]
-        produk_choice = [{'value': item['id_produk'], 'option': item['nama_produk'].title()}
-                         for item in Produk.objects.values('nama_produk', 'id_produk')]
+        get_data_produk = Produk.objects.order_by('detailproduk__tanggal_kadaluarsa').values(
+            'detailproduk__tanggal_kadaluarsa',
+            'nama_produk', 'id_produk', 'detailproduk__stok',
+            'detailproduk__harga_jual_satuan')
+
+        # gunakan variabel normalisasi_penjualan untuk menentukan stok dan harga jual produk
+        normalisasi_penjualan = defaultdict(list)
+        for index, rows in pd.DataFrame(get_data_produk).iterrows():
+            normalisasi_penjualan[rows.nama_produk].append({'kadaluwarsa': rows.detailproduk__tanggal_kadaluarsa,
+                                                            'id_produk': rows.id_produk,
+                                                            'stok': rows.detailproduk__stok,
+                                                            'harga_beli': rows.detailproduk__harga_jual_satuan})
+
+        konsumen_choice = [
+            {'value': item['id_konsumen'], 'option': item['nama_konsumen'].title()}
+            for item in Konsumen.objects.values('nama_konsumen', 'id_konsumen')]
+        produk_choice = [{'value': value[0].get('id_produk'), 'option': key}
+                         for key, value in normalisasi_penjualan.items()]
 
         context['konsumen_form'] = konsumen_choice
         context['produk_form'] = produk_choice
@@ -148,20 +169,33 @@ def pages(request):
                                                    'konsumen__alamat_konsumen',
                                                    'detailfakturpenjualan__produk__nama_produk',
                                                    'tanggal_jual', 'detailfakturpenjualan__kuantitas',
+                                                   'detailfakturpenjualan__produk__id_produk',
+                                                   'detailfakturpenjualan__jumlah_produk',
                                                    'detailfakturpenjualan__produk__detailproduk__harga_jual_satuan')
+
+
+        harga_gabungan = []
+        for item in sales:
+            if item.get('detailfakturpenjualan__jumlah_produk') is None:
+                item['harga_jual'] = item.get('detailfakturpenjualan__produk__detailproduk__harga_jual_satuan')
+            else:
+                for id_produk in re.findall(r'\d+', item.get('detailfakturpenjualan__jumlah_produk')):
+                    produk = DetailProduk.objects.get(produk=Produk.objects.get(id_produk=id_produk))
+                    harga_gabungan.append(produk.harga_jual_satuan)
+                item['harga_jual'] = sum(list(set(harga_gabungan)))
 
         for item in sales:
             if item.get('detailfakturpenjualan__kuantitas'):
-                item['total'] = item['detailfakturpenjualan__kuantitas'] * item[
-                    'detailfakturpenjualan__produk__detailproduk__harga_jual_satuan']
+                item['total'] = item['detailfakturpenjualan__kuantitas'] * item['harga_jual']
             else:
                 item['total'] = None
 
         context['penjualan'] = sales
         # End tabel penjualan
         if request.POST:
-            id_global = re.findall(r'\d+', request.POST.get('id'))
+
             if 'update' in request.POST:
+                id_global = re.findall(r'\d+', request.POST.get('id'))
                 penjualan = FakturPenjualan.objects.get(no_faktur_penjualan=id_global[0])
                 penjualan.konsumen = Konsumen.objects.get(id_konsumen=request.POST.get('konsumen'))
                 penjualan.tanggal_jual = request.POST.get('tanggal_jual')
@@ -181,18 +215,54 @@ def pages(request):
                         produk=Produk.objects.get(id_produk=request.POST.get('produk')),
                         kuantitas=request.POST.get('kuantitas'))
 
-                update_stok = DetailProduk.objects.get(produk=detail_penjualan.produk.id_produk)
-                update_stok.stok = update_stok.stok + (
-                            int(request.POST.get('harga_sebelum')) - int(request.POST.get('kuantitas')))
-                update_stok.save()
+                if request.POST.get('kuantitas_sebelum'):
+                    update_stok = DetailProduk.objects.get(produk=detail_penjualan.produk.id_produk)
+                    update_stok.stok = update_stok.stok + (
+                            int(request.POST.get('kuantitas_sebelum')) - int(request.POST.get('kuantitas')))
+                    update_stok.save()
 
             elif 'delete' in request.POST:
+                id_global = re.findall(r'\d+', request.POST.get('id'))
                 penjualan = FakturPenjualan.objects.get(no_faktur_penjualan=id_global[0])
+
+                detail_penjualan = DetailFakturPenjualan.objects.get(faktur_penjualan=penjualan.no_faktur_penjualan)
+                update_stok = DetailProduk.objects.get(produk=detail_penjualan.produk.id_produk)
+                update_stok.stok = update_stok.stok + int(request.POST.get('kuantitas'))
+
+                update_stok.save()
                 penjualan.delete()
 
             else:
-                to_database = Penjualan(request.POST)
+                # cek pada variabel normalisasi
 
+                nama_produk = str
+                for key, value in normalisasi_penjualan.items():
+                    for item in value:
+                        if str(item.get('id_produk')) == str(request.POST.get('id_produk')):
+                            nama_produk = key
+
+                kebutuhan_costumer = int(request.POST.get('kuantitas'))
+                produk_yang_dipilih = normalisasi_penjualan[nama_produk]
+                total_stok = sum([item['stok'] for item in produk_yang_dipilih])
+
+                # jika stok kurang dari kebutuhan costumer maka return pesan error dan data tidak disimpan
+                if total_stok < kebutuhan_costumer:
+                    messages.error(request,
+                                   f'Tambah penjualan gagal... Stok tidak mencukupi untuk produk yang anda pilih.'
+                                   f'Sisa stok {total_stok}')
+                    return redirect('/penjualan.html')
+
+                penjualan__id_produk = []
+                temporary_stock = produk_yang_dipilih[0].get('stok')
+                for item in produk_yang_dipilih:
+                    if kebutuhan_costumer < temporary_stock:
+                        penjualan__id_produk.append(item.get('id_produk'))
+                        break
+                    else:
+                        penjualan__id_produk.append(item.get('id_produk'))
+                    temporary_stock += item.get('stok')
+
+                to_database = Penjualan(request.POST)
                 if to_database.is_valid():
                     to_database.instance.konsumen = Konsumen.objects.get(
                         id_konsumen=request.POST.get('id_konsumen'))
@@ -202,12 +272,29 @@ def pages(request):
                         faktur_penjualan=FakturPenjualan.objects.get(
                             no_faktur_penjualan=to_database.instance.no_faktur_penjualan),
                         produk=Produk.objects.get(id_produk=request.POST.get('id_produk')),
+                        jumlah_produk=penjualan__id_produk,
                         kuantitas=request.POST.get('kuantitas'))
                     insert_to_detail_penjualan.save()
 
-                    update_stok = DetailProduk.objects.get(produk=insert_to_detail_penjualan.produk.id_produk)
-                    update_stok.stok -= int(request.POST.get('kuantitas'))
-                    update_stok.save()
+                    # update stok produk berdasarkan kuantitas dari customer, diurutkan base on expired
+                    loop = True
+                    index = 0
+                    while loop:
+
+                        if int(produk_yang_dipilih[index].get('stok')) - kebutuhan_costumer <= 0:
+                            update_stok = DetailProduk.objects.get(produk=produk_yang_dipilih[index].get('id_produk'))
+                            update_stok.stok = 0
+                            kebutuhan_costumer = kebutuhan_costumer - produk_yang_dipilih[index].get('stok')
+                            update_stok.save()
+                        else:
+                            update_stok = DetailProduk.objects.get(produk=produk_yang_dipilih[index].get('id_produk'))
+                            update_stok.stok = update_stok.stok - kebutuhan_costumer
+                            kebutuhan_costumer = kebutuhan_costumer - produk_yang_dipilih[index].get('stok')
+                            update_stok.save()
+                        if kebutuhan_costumer <= 0:
+                            loop = False
+
+                        index += 1
 
             return redirect('/penjualan.html')
     # ====== END MENU PENJUALAN ======
@@ -319,7 +406,8 @@ def pages(request):
                         request.POST.get('harga_satuan'))
                 )
 
-                update_harga_jual_to_database(request.POST.get('nama_produk'), request.POST.get('nama_jenis_produk'))
+                nama_jenis_produk = JenisProduk.objects.get(id_jenis_produk=request.POST.get('nama_jenis_produk'))
+                update_harga_jual_to_database(request.POST.get('nama_produk'), nama_jenis_produk.nama_jenis_produk)
             return redirect('/pembelian.html')
 
     # ====== END MENU PEMBELIAN ======
@@ -344,12 +432,14 @@ def pages(request):
         context['produk'] = produk
 
         if request.POST:
-            id_global = re.findall(r'\d+', request.POST.get('id'))
+
             if 'delete' in request.POST:
+                id_global = re.findall(r'\d+', request.POST.get('id'))
                 delete_produk = Produk.objects.get(id_produk=id_global[0])
                 delete_produk.delete()
 
             elif 'update' in request.POST:
+                id_global = re.findall(r'\d+', request.POST.get('id'))
                 produk = Produk.objects.get(id_produk=id_global[0])
                 produk.nama_produk = request.POST.get('nama_produk')
                 produk.jenis_produk = JenisProduk.objects.get(nama_jenis_produk=request.POST.get('jenis_produk'))
