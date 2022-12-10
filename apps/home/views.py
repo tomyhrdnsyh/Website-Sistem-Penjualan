@@ -182,7 +182,7 @@ def pages(request):
                 for id_produk in re.findall(r'\d+', item.get('detailfakturpenjualan__jumlah_produk')):
                     produk = DetailProduk.objects.get(produk=Produk.objects.get(id_produk=id_produk))
                     harga_gabungan.append(produk.harga_jual_satuan)
-                item['harga_jual'] = sum(list(set(harga_gabungan)))
+                item['harga_jual'] = np.mean(list(set(harga_gabungan)))
 
         for item in sales:
             if item.get('detailfakturpenjualan__kuantitas'):
