@@ -92,8 +92,9 @@ def index(request):
 
     raw_pembelian = defaultdict(list)
     for item in purchase_invoice:
-        raw_pembelian[item['tanggal_pembelian']].append(
-            item['detailfakturpembelian__harga_satuan'] * item['detailfakturpembelian__kuantitas'])
+        if item['detailfakturpembelian__harga_satuan'] is not None and item['detailfakturpembelian__kuantitas'] is not None:
+            raw_pembelian[item['tanggal_pembelian']].append(
+                item['detailfakturpembelian__harga_satuan'] * item['detailfakturpembelian__kuantitas'])
 
     pembelian_data = [sum(item) for item in raw_pembelian.values()]
     pembelian_labels = [datetime.strftime(item, "%d-%m-%y") for item in raw_pembelian.keys()]
