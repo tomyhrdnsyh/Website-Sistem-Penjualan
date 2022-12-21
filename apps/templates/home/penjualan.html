@@ -186,14 +186,14 @@
                         <input name="tanggal_jual" type="date" class="form-control form-custom" data-toggle="tooltip" id="tanggal_jual_edit" required>
 
                         <label for="edit-konsumen">Nama konsumen:</label>
-                        <select name="konsumen" class="form-control form-control-lg form-custom" id="edit-konsumen">
+                        <select name="id_konsumen" class="form-control form-control-lg form-custom" id="edit-konsumen">
                             {% for item in konsumen_form %}
                            <option value="{{ item.value }}">NK{{ item.value }} {{ item.option }}</option>
                             {% endfor %}
                         </select>
 
                         <label for="edit-produk">Pilih produk:</label>
-                        <select name="produk" class="form-control form-control-lg form-custom" id="edit-produk">
+                        <select name="id_produk" class="form-control form-control-lg form-custom" id="edit-produk">
                         {% for item in produk_form %}
                         <option value="{{ item.value }}">{{ item.option }}</option>
                         {% endfor %}
@@ -310,7 +310,6 @@
         konsumen = $(tr_id).find(".nama-konsumen").text();
         produk = $(tr_id).find(".produk").text();
         kuantitas = $(tr_id).find(".kuantitas").text();
-
         data_konsumen = {{ konsumen_form|safe }};
         data_produk = {{ produk_form|safe }};
 
