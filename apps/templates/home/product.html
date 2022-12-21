@@ -81,12 +81,13 @@
 
                         <td>P{{ item.id_produk }}</td>
                         <td class="nama-produk">{{ item.nama_produk }}</td>
-                        <td class="harga-beli">{{ item.detailfakturpembelian__harga_satuan|floatformat:"0" }}</td>
+                        <td class="harga-beli">{{ item.detailfakturpembelian__harga_satuan }}</td> {#|floatformat:"0" untuk menghilangkan 0 diakhir digit#}
+
                         <td class="stok">{{ item.detailproduk__stok }}</td>
                         <td class="jenis">{{ item.jenis_produk__nama_jenis_produk }}</td>
                         <td class="kadaluarsa">{{ item.detailproduk__tanggal_kadaluarsa }}</td>
                         <td class="text-center">
-                            {% if item.detailproduk__faktur_pembelian__no_faktur_pembelian is not None %}
+                            {% if item.detailproduk__faktur_pembelian__no_faktur_pembelian != 'Kosong' %}
                             <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.id_produk }}, {{ item.detailproduk__faktur_pembelian__no_faktur_pembelian }})"
                                     data-toggle="modal" id="edit" class="btn btn-success btn-sm">
                                 <i class="fas fa-edit"></i>
@@ -153,8 +154,8 @@
                         <label for="harga_satuan">Harga beli satuan:</label>
                         <input type="number" step="1" name="harga_satuan" class="form-control form-custom" required id="harga_satuan">
 
-                        <label for="tanggal_kadaluarsa">Tanggal kadaluarsa:</label>
-                        <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal_kadaluarsa" required>
+                        <label for="tanggal_kadaluarsa_create">Tanggal kadaluarsa:</label>
+                        <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal_kadaluarsa_create" required>
 
                         <button type="submit" class="form-control" style="margin-top: 2.3rem;" id="submit-button">Tambah Produk</button>
                     </form>
@@ -203,8 +204,8 @@
                         <label for="harga-satuan">Harga beli satuan:</label>
                         <input type="number" step="1" name="harga_satuan" class="form-control form-custom" required id="harga-satuan">
 
-                        <label for="tanggal-kadaluarsa">Tanggal kadaluarsa:</label>
-                        <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal-kadaluarsa" required>
+                        <label for="tanggal_kadaluarsa_edit">Tanggal kadaluarsa:</label>
+                        <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal_kadaluarsa_edit" required>
 
                         <button type="submit" class="form-control" style="margin-top: 2.3rem;" name="update" id="submit-button">Edit Produk</button>
                     </form>
@@ -274,6 +275,7 @@
       $("#table-produk").DataTable({
         "responsive": true,
         "autoWidth": false,
+        "order": [[0,'desc']]
       });
       $('#example2').DataTable({
         "paging": true,
@@ -307,7 +309,7 @@
         $('#nama-produk').val(nama);
         $('#kuantitas').val(kuantitas);
         $('#harga-satuan').val(harga_beli);
-        $('#tanggal-kadaluarsa').val(kadaluarsa);
+        $('#tanggal_kadaluarsa_edit').val(kadaluarsa);
     }
 
     // datetime convert
@@ -330,6 +332,11 @@
         var table2excel = new Table2Excel();
         table2excel.export(document.querySelectorAll("#table-produk"), name='Tabel Produk');
     });
+
+
+    // set the minimum input date is today
+    tanggal_kadaluarsa_create.min = new Date().toISOString().split("T")[0];
+    tanggal_kadaluarsa_edit.min = new Date().toISOString().split("T")[0];
 
   </script>
 

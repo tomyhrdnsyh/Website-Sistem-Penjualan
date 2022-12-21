@@ -112,8 +112,8 @@ class DetailProduk(models.Model):  # detail produk
     id_detail_produk = models.AutoField(primary_key=True)
     produk = models.ForeignKey(Produk, on_delete=models.CASCADE,
                                db_column='id_produk')
-    faktur_pembelian = models.ForeignKey(FakturPembelian, on_delete=models.CASCADE,
-                                         db_column='no_faktur_pembelian')
+    faktur_pembelian = models.ForeignKey(FakturPembelian, on_delete=models.SET_NULL,
+                                         null=True, db_column='no_faktur_pembelian')
     stok = models.IntegerField()
     tanggal_kadaluarsa = models.DateField()
     harga_jual_satuan = models.FloatField()

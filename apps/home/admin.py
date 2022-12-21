@@ -33,32 +33,32 @@ admin.site.register(CustomUser, CustomUserAdmin)
 
 @admin.register(Distributor)
 class DistributorAdmin(admin.ModelAdmin):
-    list_display = ("nama_distributor", "no_telepon", "alamat_distributor")
+    list_display = ("id_distributor", "nama_distributor", "no_telepon", "alamat_distributor")
 
 
 @admin.register(Petugas)
 class OfficerAdmin(admin.ModelAdmin):
-    list_display = ("nama_petugas", "distributor")
+    list_display = ("id_petugas", "nama_petugas", "distributor")
 
 
 @admin.register(FakturPembelian)
 class PurchaseInvoiceAdmin(admin.ModelAdmin):
-    list_display = ("pengguna", "tanggal_pembelian", "tunai")
+    list_display = ("no_faktur_pembelian", "pengguna", "tanggal_pembelian", "tunai")
 
 
 @admin.register(DetailFakturPembelian)
 class PurchaseInvoiceDetailAdmin(admin.ModelAdmin):
-    list_display = ("faktur_pembelian", "produk", "kuantitas")
+    list_display = ("id_detail_faktur_pembelian", "faktur_pembelian", "produk", "kuantitas")
 
 
 @admin.register(Produk)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("nama_produk", "jenis_produk")
+    list_display = ("id_produk", "nama_produk", "jenis_produk")
 
 
 @admin.register(DetailProduk)
 class ProductDetailAdmin(admin.ModelAdmin):
-    list_display = ("produk", "stok", "tanggal_kadaluarsa", "harga_jual_satuan")
+    list_display = ("id_detail_produk", "produk", "stok", "tanggal_kadaluarsa", "harga_jual_satuan")
 
 
 # admin.site.register(JenisProduk)
@@ -69,15 +69,15 @@ class JenisProduk(admin.ModelAdmin):
 
 @admin.register(FakturPenjualan)
 class SalesInvoiceAdmin(admin.ModelAdmin):
-    list_display = ("konsumen", "tanggal_jual")
+    list_display = ("no_faktur_penjualan", "konsumen", "tanggal_jual")
 
 
 @admin.register(DetailFakturPenjualan)
 class SalesInvoiceDetailAdmin(admin.ModelAdmin):
-    list_display = ("faktur_penjualan", "produk", "kuantitas", "jumlah_produk")
+    list_display = ("id_detail_faktur_penjualan", "faktur_penjualan", "produk", "kuantitas", "jumlah_produk")
 
 
 @admin.register(Konsumen)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ("nama_konsumen", "alamat_konsumen")
+    list_display = ("id_konsumen", "nama_konsumen", "alamat_konsumen")
 

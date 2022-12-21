@@ -140,8 +140,8 @@
                             {% endfor %}
                         </select>
 
-                        <label for="tanggal_pembelian">Waktu beli:</label>
-                        <input name="tanggal_pembelian" type="date" class="form-control form-custom" id="tanggal_pembelian" required>
+                        <label for="tanggal_pembelian_create">Waktu beli:</label>
+                        <input name="tanggal_pembelian" type="date" class="form-control form-custom" id="tanggal_pembelian_create" required>
 
 
                         <label for="jenis_produk">Jenis Produk:</label>
@@ -160,8 +160,8 @@
                         <label for="harga_satuan">Harga beli satuan:</label>
                         <input type="number" step="1.0" name="harga_satuan" class="form-control form-custom" required id="harga_satuan">
 
-                        <label for="tanggal_kadaluarsa">Tanggal kadaluarsa:</label>
-                        <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal_kadaluarsa" required>
+                        <label for="tanggal_kadaluarsa_create">Tanggal kadaluarsa:</label>
+                        <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal_kadaluarsa_create" required>
 
                         <button type="submit" class="form-control" style="margin-top: 2.3rem;" id="submit-button">Tambah Pembelian</button>
                     </form>
@@ -194,8 +194,8 @@
                             {% endfor %}
                         </select>
 
-                        <label for="tanggal-pembelian">Waktu beli:</label>
-                        <input name="tanggal_pembelian" type="date" class="form-control form-custom" id="tanggal-pembelian" required>
+                        <label for="tanggal_pembelian_edit">Waktu beli:</label>
+                        <input name="tanggal_pembelian" type="date" class="form-control form-custom" id="tanggal_pembelian_edit" required>
 
 
                         <label for="jenis-produk">Jenis Produk:</label>
@@ -214,8 +214,8 @@
                         <label for="harga-satuan">Harga beli satuan:</label>
                         <input type="number" step="1.0" name="harga_satuan" class="form-control form-custom" required id="harga-satuan">
 
-                        <label for="kadaluarsa">Tanggal kadaluarsa:</label>
-                        <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="kadaluarsa" required>
+                        <label for="tanggal_kadaluarsa_edit">Tanggal kadaluarsa:</label>
+                        <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal_kadaluarsa_edit" required>
 
                         <button type="submit" class="form-control" style="margin-top: 2.3rem;" name="update" id="submit-button">Edit Pembelian</button>
                     </form>
@@ -284,6 +284,7 @@
       $("#table-penjualan").DataTable({
         "responsive": true,
         "autoWidth": false,
+        "order": [[0,'desc']]
       });
       $('#example2').DataTable({
         "paging": true,
@@ -341,12 +342,12 @@
         nama_jenis_produk = getJenisProduk(id.slice(4), {{ modal_edit_jenis_produk|safe }} )
         $('#edit-id').val(idbeli);
         $('#distributor').val(get_value(distributor, {{ nama_distributor|safe }}));
-        $('#tanggal-pembelian').val(waktu_beli);
+        $('#tanggal_pembelian_edit').val(waktu_beli);
         $('#jenis-produk').val(get_value(nama_jenis_produk.jenis, {{ jenis_produk|safe }}));
         $('#produk').val(produk);
         $('#kuantitas').val(kuantitas);
         $('#harga-satuan').val(harga_beli);
-        $('#kadaluarsa').val(nama_jenis_produk.kadaluwarsa);
+        $('#tanggal_kadaluarsa_edit').val(nama_jenis_produk.kadaluwarsa);
     }
 
     // datetime convert
@@ -368,6 +369,13 @@
         var table2excel = new Table2Excel();
         table2excel.export(document.querySelectorAll("#table-penjualan"), name='Tabel Pembelian');
     });
+
+    // set the minimum input date is today
+    tanggal_pembelian_create.min = new Date().toISOString().split("T")[0];
+    tanggal_pembelian_edit.min = new Date().toISOString().split("T")[0];
+    tanggal_kadaluarsa_create.min = new Date().toISOString().split("T")[0];
+    tanggal_kadaluarsa_edit.min = new Date().toISOString().split("T")[0];
+
 
   </script>
 

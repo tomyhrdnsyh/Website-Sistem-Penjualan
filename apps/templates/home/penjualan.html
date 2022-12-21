@@ -182,8 +182,8 @@
                         {% csrf_token %}
                         <input name="id" type="hidden" id="edit-id">
                         <input name="kuantitas_sebelum" type="hidden" id="kuantitas-sebelum">
-                        <label for="edit-tanggal">Tanggal jual:</label>
-                        <input name="tanggal_jual" type="date" class="form-control form-custom" data-toggle="tooltip" id="edit-tanggal" required>
+                        <label for="tanggal_jual_edit">Tanggal jual:</label>
+                        <input name="tanggal_jual" type="date" class="form-control form-custom" data-toggle="tooltip" id="tanggal_jual_edit" required>
 
                         <label for="edit-konsumen">Nama konsumen:</label>
                         <select name="konsumen" class="form-control form-control-lg form-custom" id="edit-konsumen">
@@ -270,6 +270,7 @@
       $("#table-penjualan").DataTable({
         "responsive": true,
         "autoWidth": false,
+        "order": [[0,'desc']]
       });
       $('#example2').DataTable({
         "paging": true,
@@ -314,7 +315,7 @@
         data_produk = {{ produk_form|safe }};
 
         $('#edit-id').val(id);
-        $('#edit-tanggal').val(tgl_jual);
+        $('#tanggal_jual_edit').val(tgl_jual);
         $('#edit-konsumen').val(get_value(konsumen, data_konsumen));
         $('#edit-produk').val(get_value(produk, data_produk));
         $('#edit-kuantitas').val(kuantitas);
@@ -341,6 +342,9 @@
         table2excel.export(document.querySelectorAll("#table-penjualan"), name='Tabel Penjualan');
     });
 
+    // set the minimum input date is today
+    id_tanggal_jual.min = new Date().toISOString().split("T")[0];
+    tanggal_jual_edit.min = new Date().toISOString().split("T")[0];
   </script>
 
 {% endblock javascripts %}
