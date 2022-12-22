@@ -58,8 +58,8 @@
                             <td>{{ item.detailfakturpenjualan__produk__nama_produk }}</td>
                             <td>{{ item.tanggal_jual }}</td>
                             <td>{{ item.detailfakturpenjualan__kuantitas }}</td>
-                            <td>{{ item.detailfakturpenjualan__produk__detailproduk__harga_jual_satuan }}</td>
-                            <td>{% widthratio item.detailfakturpenjualan__kuantitas 1 item.detailfakturpenjualan__produk__detailproduk__harga_jual_satuan %}</td>
+                            <td>{{ item.harga_jual }}</td>
+                            <td>{{ item.total }}</td>
                           </tr>
                       {% endfor %}
                       </tbody>
