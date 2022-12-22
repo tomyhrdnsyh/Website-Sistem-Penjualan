@@ -34,9 +34,11 @@ def normalisasi_harga_jual(nama_produk: str, jenis_produk: str):
     dd_clean_detail_produk = defaultdict(lambda: defaultdict(list))
     for produk, tahun_harga in dd_raw_detail_produk.items():
         n, steps = len(tahun_harga), []
-        for tahun, harga_beli in tahun_harga.items():
-            step = 0 if not steps else tahun - steps[-1]
-            hj = (harga_beli * (step * 0.1 / n) + harga_beli)  # rumus harga jual = hb × bobot + hb
+        selisih = [item-list(tahun_harga.keys())[0] for item in tahun_harga.keys()]
+
+        for index, (tahun, harga_beli) in enumerate(tahun_harga.items()):
+            bobot = (selisih[index] / sum(selisih) / 10)
+            hj = (harga_beli * bobot + harga_beli)  # rumus harga jual = hb × bobot + hb
 
             hjp = hj * 0.2 + hj  # rumus hjp = hj * margin + hj; margin = 0.2
 
