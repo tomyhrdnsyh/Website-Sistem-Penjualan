@@ -141,21 +141,21 @@
                         {{ form_penjualan }}
 
                         <label for="id_konsumen">Nama konsumen:</label>
-                        <select name="id_konsumen" class="form-control form-control-lg form-custom" id="id_konsumen">
+                        <select name="id_konsumen" class="form-control form-control-lg form-custom" id="id_konsumen" required>
                             {% for item in konsumen_form %}
                            <option value="{{ item.value }}">NK{{ item.value }} {{ item.option }}</option>
                             {% endfor %}
                         </select>
 
                         <label for="id_produk">Pilih produk:</label>
-                        <select name="id_produk" class="form-control form-control-lg form-custom" id="id_produk">
+                        <select name="id_produk" class="form-control form-control-lg form-custom" id="id_produk" required>
                             {% for item in produk_form %}
                            <option value="{{ item.value }}">{{ item.option }}</option>
                             {% endfor %}
                         </select>
 
                         <label for="id_kuantitas">Kuantitas:</label>
-                        <input type="number" min="1" name="kuantitas" class="form-control form-control-lg form-custom" required="" id="id_kuantitas">
+                        <input type="number" min="1" name="kuantitas" class="form-control form-control-lg form-custom" required id="id_kuantitas">
 
                         <button type="submit" class="form-control" style="margin-top: 2.3rem;" id="submit-button">Tambah Penjualan</button>
                     </form>

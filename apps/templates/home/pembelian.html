@@ -134,7 +134,7 @@
                         {% csrf_token %}
 
                         <label for="no_faktur_pembelian">Nama distributor:</label>
-                        <select name="nama_distributor" class="form-control form-control-lg form-custom" id="no_faktur_pembelian">
+                        <select name="nama_distributor" class="form-control form-control-lg form-custom" id="no_faktur_pembelian" required>
                             {% for item in nama_distributor %}
                            <option value="{{ item.value }}">{{ item.option }}</option>
                             {% endfor %}
@@ -145,7 +145,7 @@
 
 
                         <label for="jenis_produk">Jenis Produk:</label>
-                        <select name="nama_jenis_produk" class="form-control form-control-lg form-custom" id="jenis_produk">
+                        <select name="nama_jenis_produk" class="form-control form-control-lg form-custom" id="jenis_produk" required>
                             {% for item in jenis_produk %}
                            <option value="{{ item.value }}">{{ item.option }}</option>
                             {% endfor %}
@@ -155,7 +155,7 @@
                         <input type="text" name="nama_produk" class="form-control form-custom" required id="nama_produk">
 
                         <label for="id_kuantitas">Kuantitas:</label>
-                        <input type="number" name="kuantitas" data-toggle="tooltip" title="Stok" class="form-control form-control-lg form-custom" required="" id="id_kuantitas">
+                        <input type="number" name="kuantitas" data-toggle="tooltip" title="Stok" class="form-control form-control-lg form-custom" required id="id_kuantitas">
 
                         <label for="harga_satuan">Harga beli satuan:</label>
                         <input type="number" step="1.0" name="harga_satuan" class="form-control form-custom" required id="harga_satuan">
@@ -188,7 +188,7 @@
                         {% csrf_token %}
                         <input name="id" type="hidden" id="edit-id">
                         <label for="distributor">Nama distributor:</label>
-                        <select name="nama_distributor" class="form-control form-control-lg form-custom" id="distributor">
+                        <select name="nama_distributor" class="form-control form-control-lg form-custom" id="distributor" required>
                             {% for item in nama_distributor %}
                            <option value="{{ item.value }}">{{ item.option }}</option>
                             {% endfor %}
@@ -199,7 +199,7 @@
 
 
                         <label for="jenis-produk">Jenis Produk:</label>
-                        <select name="nama_jenis_produk" class="form-control form-control-lg form-custom" id="jenis-produk">
+                        <select name="nama_jenis_produk" class="form-control form-control-lg form-custom" id="jenis-produk" required>
                             {% for item in jenis_produk %}
                            <option value="{{ item.value }}">{{ item.option }}</option>
                             {% endfor %}

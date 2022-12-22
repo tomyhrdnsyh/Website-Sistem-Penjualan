@@ -132,7 +132,7 @@
                         {% csrf_token %}
 
                         <label for="no_faktur_pembelian">No faktur pembelian:</label>
-                        <select name="no_faktur_pembelian" class="form-control form-control-lg form-custom" id="no_faktur_pembelian">
+                        <select name="no_faktur_pembelian" required class="form-control form-control-lg form-custom" id="no_faktur_pembelian">
                             {% for item in no_faktur_pembelian %}
                            <option value="{{ item.no_faktur_pembelian }}">{{ item.no_faktur_pembelian }}</option>
                             {% endfor %}
@@ -182,14 +182,14 @@
                         {% csrf_token %}
                         <input name="id" type="hidden" id="edit-id">
                         <label for="faktur-pembelian">No faktur pembelian:</label>
-                        <select name="no_faktur_pembelian" class="form-control form-control-lg form-custom" id="faktur-pembelian">
+                        <select name="no_faktur_pembelian" required class="form-control form-control-lg form-custom" id="faktur-pembelian">
                             {% for item in no_faktur_pembelian %}
                            <option value="{{ item.no_faktur_pembelian }}">{{ item.no_faktur_pembelian }}</option>
                             {% endfor %}
                         </select>
 
                         <label for="jenis-produk">Jenis Produk:</label>
-                        <select name="jenis_produk" class="form-control form-control-lg form-custom" id="jenis-produk">
+                        <select name="jenis_produk" required class="form-control form-control-lg form-custom" id="jenis-produk">
                             {% for item in jenis_produk %}
                            <option value="{{ item.nama_jenis_produk }}">{{ item.nama_jenis_produk }}</option>
                             {% endfor %}
