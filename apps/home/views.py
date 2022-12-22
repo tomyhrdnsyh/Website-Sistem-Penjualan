@@ -280,6 +280,14 @@ def pages(request):
             'detailfakturpembelian__produk__id_produk'
         )
 
+        # Replace None value to Kosong
+        for item in table_pembelian:
+            for key, value in item.items():
+                if value is None:
+                    item[key] = 'Kosong'
+                if isinstance(value, float):
+                    item[key] = int(value)
+
         modal_edit_jenis_produk = [{'id_produk': item['detailfakturpembelian__produk__id_produk'],
                                     'kadaluarsa': str(
                                         item['detailfakturpembelian__produk__detailproduk__tanggal_kadaluarsa']),
@@ -289,11 +297,12 @@ def pages(request):
         context['modal_edit_jenis_produk'] = modal_edit_jenis_produk
 
         for item in table_pembelian:
-            if item.get('detailfakturpembelian__kuantitas'):
+            if item.get('detailfakturpembelian__kuantitas') != 'Kosong' and item[
+                    'detailfakturpembelian__harga_satuan'] != 'Kosong':
                 item['total'] = item['detailfakturpembelian__kuantitas'] * item[
                     'detailfakturpembelian__harga_satuan']
             else:
-                item['total'] = None
+                item['total'] = 'Kosong'
 
         context['table_pembelian'] = table_pembelian
         # end data table
@@ -313,31 +322,28 @@ def pages(request):
                     distributor=Distributor.objects.get(id_distributor=request.POST.get('nama_distributor')))
                 update_pemblian.save()
 
-                update_detail_pembelian = DetailFakturPembelian.objects.get(id_detail_faktur_pembelian=id_global[1])
-                update_detail_pembelian.harga_satuan = request.POST.get('harga_satuan')
-                update_detail_pembelian.kuantitas = request.POST.get('kuantitas')
-                update_detail_pembelian.save()
+                if len(id_global) < 3:  # cek apakah id detail faktur pembelian dan produk == KOSONG
+                    add_faktur_pembelian_detail_product(request, update_pemblian)
+                else:
+                    update_detail_pembelian = DetailFakturPembelian.objects.get(id_detail_faktur_pembelian=id_global[1])
+                    update_detail_pembelian.harga_satuan = request.POST.get('harga_satuan')
+                    update_detail_pembelian.kuantitas = request.POST.get('kuantitas')
+                    update_detail_pembelian.save()
 
-                update_produk = Produk.objects.get(id_produk=id_global[2])
-                update_produk.nama_produk = request.POST.get('nama_produk')
-                update_produk.jenis_produk = JenisProduk.objects.get(
-                    id_jenis_produk=request.POST.get('nama_jenis_produk'))
-                update_produk.save()
+                    update_produk = Produk.objects.get(id_produk=id_global[2])
+                    update_produk.nama_produk = request.POST.get('nama_produk')
+                    update_produk.jenis_produk = JenisProduk.objects.get(
+                        id_jenis_produk=request.POST.get('nama_jenis_produk'))
+                    update_produk.save()
 
-                update_detail_produk = DetailProduk.objects.get(produk=update_produk.id_produk)
-                update_detail_produk.tanggal_kadaluarsa = request.POST.get('tanggal_kadaluarsa')
-                update_detail_produk.save()
+                    update_detail_produk = DetailProduk.objects.get(produk=update_produk.id_produk)
+                    update_detail_produk.tanggal_kadaluarsa = request.POST.get('tanggal_kadaluarsa')
+                    update_detail_produk.save()
 
                 jenis_produk = JenisProduk.objects.get(id_jenis_produk=request.POST.get('nama_jenis_produk'))
                 update_harga_jual_to_database(request.POST.get('nama_produk'), jenis_produk.nama_jenis_produk)
 
             else:
-
-                insert_produk = Produk.objects. \
-                    create(nama_produk=request.POST.get('nama_produk'),
-                           jenis_produk=JenisProduk.objects.get(
-                               id_jenis_produk=request.POST.get('nama_jenis_produk')))
-
                 insert_faktur_pembelian = FakturPembelian.objects.create(
                     tanggal_pembelian=request.POST.get('tanggal_pembelian'),
                     tunai=float(request.POST.get('harga_satuan')) * float(request.POST.get('kuantitas')),
@@ -346,23 +352,8 @@ def pages(request):
                         distributor=Distributor.objects.get(id_distributor=request.POST.get('nama_distributor'))),
                 )
 
-                DetailFakturPembelian.objects.create(
-                    faktur_pembelian=FakturPembelian.objects.get(
-                        no_faktur_pembelian=insert_faktur_pembelian.no_faktur_pembelian),
-                    produk=Produk.objects.get(id_produk=insert_produk.id_produk),
-                    kuantitas=request.POST.get('kuantitas'),
-                    harga_satuan=request.POST.get('harga_satuan')
-                )
-
-                DetailProduk.objects.create(
-                    faktur_pembelian=FakturPembelian.objects.get(
-                        no_faktur_pembelian=insert_faktur_pembelian.no_faktur_pembelian),
-                    produk=Produk.objects.get(id_produk=insert_produk.id_produk),
-                    stok=request.POST.get('kuantitas'),
-                    tanggal_kadaluarsa=request.POST.get('tanggal_kadaluarsa'),
-                    harga_jual_satuan=float(request.POST.get('harga_satuan')) * 0.2 + float(
-                        request.POST.get('harga_satuan'))
-                )
+                # function add detail faktur pembelian, detail produk etc
+                add_faktur_pembelian_detail_product(request, insert_faktur_pembelian)
 
                 nama_jenis_produk = JenisProduk.objects.get(id_jenis_produk=request.POST.get('nama_jenis_produk'))
                 update_harga_jual_to_database(request.POST.get('nama_produk'), nama_jenis_produk.nama_jenis_produk)
@@ -601,3 +592,29 @@ def add_data_penjualan(normalisasi_penjualan, req, save_to_database=True):
                 loop = False
 
             index += 1
+
+
+def add_faktur_pembelian_detail_product(req, insert_faktur_pembelian):
+
+    insert_produk = Produk.objects. \
+        create(nama_produk=req.POST.get('nama_produk'),
+               jenis_produk=JenisProduk.objects.get(
+                   id_jenis_produk=req.POST.get('nama_jenis_produk')))
+
+    DetailFakturPembelian.objects.create(
+        faktur_pembelian=FakturPembelian.objects.get(
+            no_faktur_pembelian=insert_faktur_pembelian.no_faktur_pembelian),
+        produk=Produk.objects.get(id_produk=insert_produk.id_produk),
+        kuantitas=req.POST.get('kuantitas'),
+        harga_satuan=req.POST.get('harga_satuan')
+    )
+
+    DetailProduk.objects.create(
+        faktur_pembelian=FakturPembelian.objects.get(
+            no_faktur_pembelian=insert_faktur_pembelian.no_faktur_pembelian),
+        produk=Produk.objects.get(id_produk=insert_produk.id_produk),
+        stok=req.POST.get('kuantitas'),
+        tanggal_kadaluarsa=req.POST.get('tanggal_kadaluarsa'),
+        harga_jual_satuan=float(req.POST.get('harga_satuan')) * 0.2 + float(
+            req.POST.get('harga_satuan'))
+    )

@@ -84,7 +84,7 @@
                         <td class="tanggal">{{ item.tanggal_pembelian }}</td>
                         <td class="nama-produk">{{ item.detailfakturpembelian__produk__nama_produk }}</td>
                         <td class="kuantitas">{{ item.detailfakturpembelian__kuantitas }}</td>
-                        <td class="harga">{{ item.detailfakturpembelian__harga_satuan|floatformat:"0" }}</td>
+                        <td class="harga">{{ item.detailfakturpembelian__harga_satuan }}</td> {# |floatformat:"0" #}
                         <td>{{ item.total }}</td>
                         <td class="text-center">
                             <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan('{{ item.no_faktur_pembelian }}{{ item.detailfakturpembelian__id_detail_faktur_pembelian }}{{ item.detailfakturpembelian__produk__id_produk }}')"
