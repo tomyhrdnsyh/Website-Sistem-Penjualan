@@ -37,7 +37,11 @@ def normalisasi_harga_jual(nama_produk: str, jenis_produk: str):
         selisih = [item-list(tahun_harga.keys())[0] for item in tahun_harga.keys()]
 
         for index, (tahun, harga_beli) in enumerate(tahun_harga.items()):
-            bobot = (selisih[index] / sum(selisih) / 10)
+            # bobot = (selisih[index] / sum(selisih) / 10)
+            try:
+                bobot = (selisih[index] / sum(selisih) / 10)
+            except ZeroDivisionError:
+                bobot = 0
             hj = (harga_beli * bobot + harga_beli)  # rumus harga jual = hb × bobot + hb
 
             hjp = hj * 0.2 + hj  # rumus hjp = hj * margin + hj; margin = 0.2
