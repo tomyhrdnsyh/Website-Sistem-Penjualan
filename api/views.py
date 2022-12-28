@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from django.contrib.auth import authenticate
 from apps.home.models import FakturPembelian, JenisProduk, Produk, DetailProduk, DetailFakturPembelian
 from .serializers import ItemSerializerPembelian, ItemSerializerJenisProduk
 from datetime import datetime
@@ -18,6 +19,21 @@ def jenis_produk(request):
     jenis_produk = JenisProduk.objects.values('nama_jenis_produk')
     serializer = ItemSerializerJenisProduk(jenis_produk, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+def auth(request):
+    data = request.data
+
+    username = data.get("username")
+    password = data.get("password")
+
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        if user.is_superuser:
+            return Response({'message': 'Success'})
+        return Response({'message': 'Akun anda tidak memiliki otoritas di aplikasi ini'})
+    return Response({'message': 'Username password salah!'})
 
 
 @api_view(['POST'])
