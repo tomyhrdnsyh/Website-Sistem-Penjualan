@@ -126,6 +126,8 @@
                         {% csrf_token %}
 
                         {{ form_distributor }}
+                        <label for="id-alamat-distributor">Nama Petugas:</label>
+                        <input type="text" name="nama_petugas" class="form-control form-custom" maxlength="254" placeholder="Yoni" required id="nama-petugas">
 
                         <button type="submit" class="form-control" style="margin-top: 2.3rem;" id="submit-button">Tambah Distributor</button>
                     </form>
@@ -225,6 +227,7 @@
       $("#table-produk").DataTable({
         "responsive": true,
         "autoWidth": false,
+        "order": [[0,'desc']]
       });
       $('#example2').DataTable({
         "paging": true,

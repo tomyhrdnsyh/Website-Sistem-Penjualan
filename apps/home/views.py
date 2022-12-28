@@ -506,6 +506,12 @@ def pages(request):
                 to_database = FormDistributor(request.POST)
                 if to_database.is_valid():
                     to_database.save()
+                    # save new petugas
+                    petugas = Petugas(
+                        distributor=to_database.instance,
+                        nama_petugas=request.POST.get('nama_petugas')
+                    )
+                    petugas.save()
 
             return redirect('/distributor.html')
 
