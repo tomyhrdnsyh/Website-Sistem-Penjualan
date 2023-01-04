@@ -9,7 +9,6 @@ from django.contrib.auth.models import AbstractUser
 
 
 class CustomUser(AbstractUser):
-
     id_pengguna = models.AutoField(primary_key=True)
     nama_lengkap = models.CharField(max_length=100, null=True)
     no_hp_pengguna = models.CharField(max_length=20, null=True)
@@ -48,7 +47,7 @@ class Petugas(models.Model):
         db_table = 'petugas'
 
 
-class JenisProduk(models.Model):   # jenis produk
+class JenisProduk(models.Model):  # jenis produk
     id_jenis_produk = models.AutoField(primary_key=True)
     nama_jenis_produk = models.CharField(max_length=100)
 
@@ -74,7 +73,7 @@ class Produk(models.Model):
         db_table = 'produk'
 
 
-class FakturPembelian(models.Model):    # faktur pembelian
+class FakturPembelian(models.Model):  # faktur pembelian
     no_faktur_pembelian = models.AutoField(primary_key=True)
     pengguna = models.ForeignKey(CustomUser, null=True, on_delete=models.CASCADE,
                                  db_column='id_pengguna')
@@ -91,7 +90,7 @@ class FakturPembelian(models.Model):    # faktur pembelian
         db_table = 'faktur_pembelian'
 
 
-class DetailFakturPembelian(models.Model): # detail faktur pembelian
+class DetailFakturPembelian(models.Model):  # detail faktur pembelian
     id_detail_faktur_pembelian = models.AutoField(primary_key=True)
     faktur_pembelian = models.ForeignKey(FakturPembelian, on_delete=models.CASCADE,
                                          db_column='no_faktur_pembelian')
@@ -139,7 +138,7 @@ class Konsumen(models.Model):
         db_table = 'konsumen'
 
 
-class FakturPenjualan(models.Model):   # faktur penjualan
+class FakturPenjualan(models.Model):  # faktur penjualan
     no_faktur_penjualan = models.AutoField(primary_key=True)
     konsumen = models.ForeignKey(Konsumen, db_column='id_konsumen', on_delete=models.CASCADE)
     tanggal_jual = models.DateField()
@@ -152,14 +151,13 @@ class FakturPenjualan(models.Model):   # faktur penjualan
         db_table = 'faktur_penjualan'
 
 
-class DetailFakturPenjualan(models.Model): # detail faktur penjualan
+class DetailFakturPenjualan(models.Model):  # detail faktur penjualan
     id_detail_faktur_penjualan = models.AutoField(primary_key=True)
     faktur_penjualan = models.ForeignKey(FakturPenjualan, on_delete=models.CASCADE,
                                          db_column='no_faktur_penjualan')
-    produk = models.ForeignKey(Produk, on_delete=models.CASCADE, null=True,
-                               db_column='id_produk')
-    kuantitas = models.IntegerField()
-    jumlah_produk = models.CharField(max_length=250, null=True)
+    produk = models.ManyToManyField(Produk, db_column='id_produk')
+    kuantitas = models.CharField(max_length=250, null=True, blank=True)
+    # jumlah_produk = models.CharField(max_length=250, null=True, blank=True)
 
     def __str__(self):
         return str(self.produk)
@@ -167,4 +165,3 @@ class DetailFakturPenjualan(models.Model): # detail faktur penjualan
     class Meta:
         verbose_name_plural = 'detail faktur penjualan'
         db_table = 'detail_faktur_penjualan'
-

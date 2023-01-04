@@ -74,7 +74,7 @@ class SalesInvoiceAdmin(admin.ModelAdmin):
 
 @admin.register(DetailFakturPenjualan)
 class SalesInvoiceDetailAdmin(admin.ModelAdmin):
-    list_display = ("id_detail_faktur_penjualan", "faktur_penjualan", "produk", "kuantitas", "jumlah_produk")
+    list_display = ("id_detail_faktur_penjualan", "faktur_penjualan", "kuantitas")
 
 
 @admin.register(Konsumen)
