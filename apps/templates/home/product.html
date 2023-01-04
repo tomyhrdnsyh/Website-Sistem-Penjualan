@@ -69,6 +69,7 @@
                     <th>ID</th>
                     <th>Nama Produk</th>
                     <th>Harga Beli</th>
+                    <th>Harga Jual</th>
                     <th>Stok</th>
                     <th>Jenis</th>
                     <th>Tanggal Kadaluarsa</th>
@@ -82,6 +83,7 @@
                         <td>P{{ item.id_produk }}</td>
                         <td class="nama-produk">{{ item.nama_produk }}</td>
                         <td class="harga-beli">{{ item.detailfakturpembelian__harga_satuan }}</td> {#|floatformat:"0" untuk menghilangkan 0 diakhir digit#}
+                        <td class="harga-jual">{{ item.detailproduk__harga_jual_satuan }}</td> {#|floatformat:"0" untuk menghilangkan 0 diakhir digit#}
                         <td class="stok">{{ item.detailproduk__stok }}</td>
                         <td class="jenis">{{ item.jenis_produk__nama_jenis_produk }}</td>
                         <td class="kadaluarsa">{{ item.detailproduk__tanggal_kadaluarsa }}</td>

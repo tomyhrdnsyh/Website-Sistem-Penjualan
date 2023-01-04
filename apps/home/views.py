@@ -381,13 +381,13 @@ def pages(request):
         # ===== table produk =====
         produk = Produk.objects.order_by('-id_produk').values(
             'id_produk', 'nama_produk', 'detailfakturpembelian__harga_satuan',
-            'detailproduk__stok', 'jenis_produk__nama_jenis_produk',
+            'detailproduk__stok', 'jenis_produk__nama_jenis_produk', 'detailproduk__harga_jual_satuan',
             'detailproduk__tanggal_kadaluarsa', 'detailproduk__faktur_pembelian__no_faktur_pembelian'
         )
         # ----- replace None to kosong and change price type to int -----
         for item in produk:
             for key, value in item.items():
-                if key == 'detailfakturpembelian__harga_satuan':
+                if key in ['detailfakturpembelian__harga_satuan', 'detailproduk__harga_jual_satuan']:
                     if isinstance(value, float):
                         item[key] = int(value)
 
