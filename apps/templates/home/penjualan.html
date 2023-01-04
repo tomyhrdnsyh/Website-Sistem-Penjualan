@@ -147,7 +147,9 @@
                             {% endfor %}
                         </select>
 
-                        <label for="id_produk">Pilih produk:</label>
+
+                        <div class="input_fields_wrap">
+                        <label for="id_produk">Pilih produk:</label><button style="float: right;" class="btn btn-success btn-sm add_field_button"><i class="fa fa-plus"></i></button>
                         <select name="id_produk" class="form-control form-control-lg form-custom" id="id_produk" required>
                             {% for item in produk_form %}
                            <option value="{{ item.value }}">{{ item.option }}</option>
@@ -156,6 +158,7 @@
 
                         <label for="id_kuantitas">Kuantitas:</label>
                         <input type="number" min="1" name="kuantitas" class="form-control form-control-lg form-custom" required id="id_kuantitas">
+                        </div>
 
                         <button type="submit" class="form-control" style="margin-top: 2.3rem;" id="submit-button">Tambah Penjualan</button>
                     </form>
@@ -193,7 +196,7 @@
                         </select>
 
                         <label for="edit-produk">Pilih produk:</label>
-                        <select name="id_produk" class="form-control form-control-lg form-custom" id="edit-produk">
+                        <select name="id_produk" class="form-control form-control-lg form-custom" id="edit-produk" multiple>
                         {% for item in produk_form %}
                         <option value="{{ item.value }}">{{ item.option }}</option>
                         {% endfor %}
@@ -265,6 +268,27 @@
   <script src="{% static '/js/demo.js' %}"></script>
   <!-- page script -->
   <script>
+  // button add field
+  $(document).ready(function() {
+	var max_fields      = 10; //maximum input boxes allowed
+	var wrapper   		= $(".input_fields_wrap"); //Fields wrapper
+	var add_button      = $(".add_field_button"); //Add button ID
+
+	var x = 1; //initlal text box count
+	$(add_button).click(function(e){ //on add input button click
+		e.preventDefault();
+		if(x < max_fields){ //max input box allowed
+			x++; //text box increment
+			$(wrapper).append('<div><label for="id_produk">Pilih produk:</label><select name="id_produk" class="form-control form-control-lg form-custom" id="id_produk" required> {% for item in produk_form %} <option value="{{ item.value }}">{{ item.option }}</option>{% endfor %}</select><label for="id_kuantitas">Kuantitas:</label><input type="number" min="1" name="kuantitas" class="form-control form-control-lg form-custom" required id="id_kuantitas"><a href="#" class="remove_field">Remove</a></div>'); //add input box
+		}
+	});
+
+	$(wrapper).on("click",".remove_field", function(e){ //user click on remove text
+		e.preventDefault(); $(this).parent('div').remove(); x--;
+	})
+});
+
+
   // window.onload = function() { window.print(); }
     $(function () {
       $("#table-penjualan").DataTable({

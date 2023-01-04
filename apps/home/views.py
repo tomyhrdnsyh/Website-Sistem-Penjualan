@@ -164,6 +164,7 @@ def pages(request):
         konsumen_choice = [
             {'value': item['id_konsumen'], 'option': item['nama_konsumen'].title()}
             for item in Konsumen.objects.values('nama_konsumen', 'id_konsumen')]
+
         produk_choice = [{'value': value[0].get('id_produk'), 'option': key}
                          for key, value in normalisasi_penjualan.items()]
 
@@ -532,22 +533,26 @@ def pages(request):
 
 
 def check_stock_produk(normalisasi_penjualan, req):
-    nama_produk = str
+
+    nama_produk = []
     for key, value in normalisasi_penjualan.items():
         for item in value:
-            if str(item.get('id_produk')) == str(req.POST.get('id_produk')):
-                nama_produk = key
+            if str(item.get('id_produk')) in req.POST.getlist('id_produk'):
 
-    kebutuhan_costumer = int(req.POST.get('kuantitas'))
-    produk_yang_dipilih = normalisasi_penjualan[nama_produk]
-    total_stok = sum([item['stok'] for item in produk_yang_dipilih])
+                nama_produk.append(key)
+
+    kebutuhan_costumer = [int(kuantitas) for kuantitas in req.POST.getlist('kuantitas')]     # list
+    produk_yang_dipilih = [normalisasi_penjualan[nama] for nama in nama_produk]     # list
+    total_stok = [sum([item['stok'] for item in produk]) for produk in produk_yang_dipilih]     # list
 
     # jika stok kurang dari kebutuhan costumer maka return pesan error dan data tidak disimpan
-    if total_stok < kebutuhan_costumer:
-        messages.error(req,
-                       f'Tambah penjualan gagal... Stok tidak mencukupi untuk produk yang anda pilih.'
-                       f'Sisa stok {total_stok}')
-        return redirect('/penjualan.html')
+
+    for index, kebutuhan in enumerate(kebutuhan_costumer):
+        if total_stok[index] < kebutuhan:
+            messages.error(req,
+                           f'Tambah penjualan gagal... Stok tidak mencukupi untuk produk yang anda pilih.'
+                           f'Sisa stok {nama_produk[index]} : {total_stok[index]}')
+            return redirect('/penjualan.html')
     return {'produk_yang_dipilih': produk_yang_dipilih, 'kebutuhan_costumer': kebutuhan_costumer}
 
 
@@ -560,6 +565,7 @@ def add_data_penjualan(normalisasi_penjualan, req, save_to_database=True):
     else:
         return raw_check
 
+    # baru nyampe sini ya update nya
     penjualan__id_produk = []
     temporary_stock = produk_yang_dipilih[0].get('stok')
     for item in produk_yang_dipilih:
