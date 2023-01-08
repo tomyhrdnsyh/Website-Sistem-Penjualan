@@ -115,7 +115,7 @@ def index(request):
                                                            'produk__detailproduk__harga_jual_satuan',
                                                            'quantity__kuantitas')
 
-    print(total_penjualan)
+
     total_penjualan = sum(
         [item['produk__detailproduk__harga_jual_satuan'] * item['quantity__kuantitas'] for item in total_penjualan])
     total_penjualan = f'{total_penjualan:,}'[:15]
@@ -197,8 +197,18 @@ def pages(request):
                 faktur_jual = FakturPenjualan.objects.get(no_faktur_penjualan=item['no_faktur_penjualan'])
                 faktur_jual.delete()
             else:
-                item['total'] = f"{int(qty * hjm):,}"
+                item['total'] = int(qty * hjm)
                 item['detailfakturpenjualan__produk__detailproduk__harga_jual_satuan'] = f"{int(hjm):,}"
+
+        df_sale = pd.DataFrame(sales)
+        groupby_faktur_penjualan = df_sale.groupby(['no_faktur_penjualan']).sum()
+        jumlah = {index: rows.total for index, rows in groupby_faktur_penjualan.iterrows()}
+
+        for key, value in jumlah.items():
+            for item in sales:
+                if key == item['no_faktur_penjualan']:
+                    item['jumlah'] = f"{value:,}"
+                    break
 
         context['penjualan'] = sales
         # End tabel penjualan

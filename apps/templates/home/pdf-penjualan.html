@@ -47,6 +47,7 @@
                         <th>Kuantitas</th>
                         <th>Harga Jual (IDR)</th>
                         <th>Total (IDR)</th>
+                        <th>Jumlah (IDR)</th>
                       </tr>
                       </thead>
                       <tbody>
@@ -57,9 +58,10 @@
                             <td>{{ item.konsumen__alamat_konsumen }}</td>
                             <td>{{ item.detailfakturpenjualan__produk__nama_produk }}</td>
                             <td>{{ item.tanggal_jual }}</td>
-                            <td>{{ item.detailfakturpenjualan__kuantitas }}</td>
-                            <td>{{ item.harga_jual }}</td>
+                            <td>{{ item.detailfakturpenjualan__quantity__kuantitas }}</td>
+                            <td>{{ item.detailfakturpenjualan__produk__detailproduk__harga_jual_satuan }}</td>
                             <td>{{ item.total }}</td>
+                            <td>{{ item.jumlah }}</td>
                           </tr>
                       {% endfor %}
                       </tbody>
