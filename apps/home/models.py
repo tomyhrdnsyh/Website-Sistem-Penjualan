@@ -144,7 +144,7 @@ class FakturPenjualan(models.Model):  # faktur penjualan
     tanggal_jual = models.DateField()
 
     def __str__(self):
-        return str(self.konsumen)
+        return str(self.no_faktur_penjualan)
 
     class Meta:
         verbose_name_plural = 'faktur penjualan'
@@ -155,13 +155,24 @@ class DetailFakturPenjualan(models.Model):  # detail faktur penjualan
     id_detail_faktur_penjualan = models.AutoField(primary_key=True)
     faktur_penjualan = models.ForeignKey(FakturPenjualan, on_delete=models.CASCADE,
                                          db_column='no_faktur_penjualan')
-    produk = models.ManyToManyField(Produk, db_column='id_produk')
-    kuantitas = models.CharField(max_length=250, null=True, blank=True)
-    # jumlah_produk = models.CharField(max_length=250, null=True, blank=True)
+    produk = models.ManyToManyField(Produk, db_column='id_produk', through='Quantity')
 
     def __str__(self):
-        return str(self.produk)
+        return str(self.id_detail_faktur_penjualan)
 
     class Meta:
         verbose_name_plural = 'detail faktur penjualan'
         db_table = 'detail_faktur_penjualan'
+
+
+class Quantity(models.Model):
+    id_kuantitas = models.AutoField(primary_key=True)
+    detail_faktur_penjualan = models.ForeignKey(DetailFakturPenjualan, on_delete=models.CASCADE)
+    produk = models.ForeignKey(Produk, on_delete=models.CASCADE)
+    kuantitas = models.IntegerField()
+
+    def __str__(self):
+        return str(self.kuantitas)
+
+    class Meta:
+        db_table = 'kuantitas_penjualan'

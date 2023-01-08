@@ -8,8 +8,6 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import *
 
-# Register your models here.
-# admin.site.register(CustomUser)
 
 
 class CustomUserAdmin(UserAdmin):
@@ -74,10 +72,14 @@ class SalesInvoiceAdmin(admin.ModelAdmin):
 
 @admin.register(DetailFakturPenjualan)
 class SalesInvoiceDetailAdmin(admin.ModelAdmin):
-    list_display = ("id_detail_faktur_penjualan", "faktur_penjualan", "kuantitas")
+    list_display = ("id_detail_faktur_penjualan", "faktur_penjualan")
 
 
 @admin.register(Konsumen)
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ("id_konsumen", "nama_konsumen", "alamat_konsumen")
 
+
+@admin.register(Quantity)
+class QuantityAdmin(admin.ModelAdmin):
+    list_display = ("id_kuantitas", "detail_faktur_penjualan", "produk", "kuantitas")

@@ -91,17 +91,17 @@
                   </thead>
                   <tbody>
                   {% for item in penjualan %}
-                      <tr id="sale-{{ item.no_faktur_penjualan }}">
-                        <td>FJ{{ item.no_faktur_penjualan }}.P{{ item.detailfakturpenjualan__produk__id_produk }}</td>
+                      <tr id="sale-{{ item.no_faktur_penjualan }}{{ item.detailfakturpenjualan__produk__id_produk }}">
+                        <td class="id_jual">FJ{{ item.no_faktur_penjualan }}.P{{ item.detailfakturpenjualan__produk__id_produk }}</td>
                         <td class="nama-konsumen">{{ item.konsumen__nama_konsumen }}</td>
                         <td>{{ item.konsumen__alamat_konsumen }}</td>
                         <td class="produk">{{ item.detailfakturpenjualan__produk__nama_produk }}</td>
                         <td class="tanggal-jual">{{ item.tanggal_jual }}</td>
-                        <td class="kuantitas">{{ item.detailfakturpenjualan__kuantitas }}</td>
-                        <td class="harga">{{ item.harga_jual }}</td>
+                        <td class="kuantitas">{{ item.detailfakturpenjualan__quantity__kuantitas }}</td>
+                        <td class="harga">{{ item.detailfakturpenjualan__produk__detailproduk__harga_jual_satuan }}</td>
                         <td>{{ item.total }}</td>
                         <td class="text-center">
-                            <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.no_faktur_penjualan }})"
+                            <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.no_faktur_penjualan }}{{ item.detailfakturpenjualan__produk__id_produk }})"
                                     data-toggle="modal" id="edit" class="btn btn-success btn-sm">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -196,7 +196,7 @@
                         </select>
 
                         <label for="edit-produk">Pilih produk:</label>
-                        <select name="id_produk" class="form-control form-control-lg form-custom" id="edit-produk" multiple>
+                        <select name="id_produk" class="form-control form-control-lg form-custom" id="edit-produk">
                         {% for item in produk_form %}
                         <option value="{{ item.value }}">{{ item.option }}</option>
                         {% endfor %}
@@ -204,6 +204,7 @@
 
                         <label for="edit-kuantitas">Kuantitas:</label>
                         <input name="kuantitas" type="number" class="form-control form-control-lg form-custom" id="edit-kuantitas" required>
+
 
                         <button type="submit" class="form-control" style="margin-top: 2.3rem;" name="update" id="submit-button">Edit Penjualan</button>
                     </form>
@@ -330,6 +331,7 @@
     // update penjualan
     function editPenjualan(id) {
         tr_id = '#sale-' + id;
+        id_jual = $(tr_id).find(".id_jual").text();
         tgl_jual = formatDate($(tr_id).find(".tanggal-jual").text());
         konsumen = $(tr_id).find(".nama-konsumen").text();
         produk = $(tr_id).find(".produk").text();
@@ -337,7 +339,7 @@
         data_konsumen = {{ konsumen_form|safe }};
         data_produk = {{ produk_form|safe }};
 
-        $('#edit-id').val(id);
+        $('#edit-id').val(id_jual);
         $('#tanggal_jual_edit').val(tgl_jual);
         $('#edit-konsumen').val(get_value(konsumen, data_konsumen));
         $('#edit-produk').val(get_value(produk, data_produk));
