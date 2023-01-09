@@ -201,14 +201,17 @@ def pages(request):
                 item['detailfakturpenjualan__produk__detailproduk__harga_jual_satuan'] = f"{int(hjm):,}"
 
         df_sale = pd.DataFrame(sales)
-        groupby_faktur_penjualan = df_sale.groupby(['no_faktur_penjualan']).sum()
-        jumlah = {index: rows.total for index, rows in groupby_faktur_penjualan.iterrows()}
 
-        for key, value in jumlah.items():
-            for item in sales:
-                if key == item['no_faktur_penjualan']:
-                    item['jumlah'] = f"{value:,}"
-                    break
+        if not df_sale.empty:
+
+            groupby_faktur_penjualan = df_sale.groupby(['no_faktur_penjualan']).sum()
+            jumlah = {index: rows.total for index, rows in groupby_faktur_penjualan.iterrows()}
+
+            for key, value in jumlah.items():
+                for item in sales:
+                    if key == item['no_faktur_penjualan']:
+                        item['jumlah'] = f"{value:,}"
+                        break
 
         context['penjualan'] = sales
         # End tabel penjualan
