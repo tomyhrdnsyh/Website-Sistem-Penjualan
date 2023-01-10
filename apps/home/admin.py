@@ -9,20 +9,26 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import *
 
 
-
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
-        *UserAdmin.fieldsets,
-        (
-            'Informasi lain',
-            {
-                'fields': (
-                    'no_hp_pengguna',
-                    'nama_lengkap',
-                )
-            }
-        )
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('no_hp_pengguna', 'nama_lengkap')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff',
+                                    'is_superuser', 'groups', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
+    # fieldsets = (
+    #     *UserAdmin.fieldsets,
+    #     (
+    #         'Informasi lain',
+    #         {
+    #             'fields': (
+    #                 'no_hp_pengguna',
+    #                 'nama_lengkap',
+    #             )
+    #         }
+    #     )
+    # )
     list_display = ('id_pengguna', 'username', 'no_hp_pengguna')
 
 

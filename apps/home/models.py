@@ -9,6 +9,9 @@ from django.contrib.auth.models import AbstractUser
 
 
 class CustomUser(AbstractUser):
+    first_name = None
+    last_name = None
+    email = None
     id_pengguna = models.AutoField(primary_key=True)
     nama_lengkap = models.CharField(max_length=100, null=True)
     no_hp_pengguna = models.CharField(max_length=20, null=True)
