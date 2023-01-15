@@ -69,7 +69,7 @@ class Produk(models.Model):
     nama_produk = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.nama_produk
+        return str(self.id_produk)
 
     class Meta:
         verbose_name_plural = 'produk'

@@ -190,12 +190,33 @@ def pages(request):
 
         # Tabel penjualan
         sales = FakturPenjualan.objects. \
-            order_by('-no_faktur_penjualan').values('no_faktur_penjualan', 'konsumen__nama_konsumen',
+            order_by('no_faktur_penjualan').values('no_faktur_penjualan', 'konsumen__nama_konsumen',
                                                     'konsumen__alamat_konsumen',
                                                     'detailfakturpenjualan__produk__nama_produk',
                                                     'tanggal_jual', 'detailfakturpenjualan__quantity__kuantitas',
                                                     'detailfakturpenjualan__produk__id_produk',
                                                     'detailfakturpenjualan__produk__detailproduk__harga_jual_satuan')
+
+        df_raw = pd.DataFrame(sales)
+        if not df_raw.empty:
+            cek_nama_produk = df_raw[['no_faktur_penjualan', 'detailfakturpenjualan__produk__nama_produk']].value_counts().to_dict()
+
+            for key, value in cek_nama_produk.items():
+                if value > 1:
+                    filtering = df_raw[(df_raw['no_faktur_penjualan'] == key[0]) & (df_raw['detailfakturpenjualan__produk__nama_produk'] == key[1])]
+                    rata_harga_jual = filtering['detailfakturpenjualan__produk__detailproduk__harga_jual_satuan'].mean()
+                    kuantitas = filtering['detailfakturpenjualan__quantity__kuantitas'].sum()
+
+                    df_raw['detailfakturpenjualan__produk__id_produk'] = df_raw['detailfakturpenjualan__produk__id_produk'].astype(str)
+                    index = list(filtering.index)
+                    id_products = df_raw.loc[index, 'detailfakturpenjualan__produk__id_produk'].to_list()
+
+                    df_raw['detailfakturpenjualan__produk__detailproduk__harga_jual_satuan'][index[0]] = rata_harga_jual
+                    df_raw['detailfakturpenjualan__quantity__kuantitas'][index[0]] = kuantitas
+                    # df_raw['detailfakturpenjualan__produk__id_produk'][index[0]] = 'P'.join(id_products)
+
+                    df_raw = df_raw.drop(index[1:])
+                    sales = df_raw.to_dict(orient="record")
 
         for item in sales:
             qty = item['detailfakturpenjualan__quantity__kuantitas']
@@ -206,12 +227,10 @@ def pages(request):
                 faktur_jual.delete()
             else:
                 item['total'] = int(qty * hjm)
-                item['detailfakturpenjualan__produk__detailproduk__harga_jual_satuan'] = f"{int(hjm):,}"
 
         df_sale = pd.DataFrame(sales)
 
         if not df_sale.empty:
-
             groupby_faktur_penjualan = df_sale.groupby(['no_faktur_penjualan']).sum()
             jumlah = {index: rows.total for index, rows in groupby_faktur_penjualan.iterrows()}
 
@@ -244,11 +263,32 @@ def pages(request):
 
                 # update item pada model quantity
                 quantity = Quantity.objects.filter(detail_faktur_penjualan=detail_penjualan,
-                                                   produk=old_produk).values('id_kuantitas', 'produk', 'kuantitas')
-                quantity.update(
-                    produk=request.POST.get('id_produk'),
-                    kuantitas=request.POST.get('kuantitas')
-                )
+                                                   produk__nama_produk=old_produk.nama_produk).values('id_kuantitas',
+                                                                                                      'produk',
+                                                                                                      'kuantitas')
+                new_produk = request.POST.get('id_produk')
+                if Produk.objects.get(id_produk=new_produk).nama_produk != old_produk.nama_produk:
+
+                    for item in quantity:
+                        item_quantity = Quantity.objects.get(id_kuantitas=item.get('id_kuantitas'))
+
+                        updt_stok_old_produk = DetailProduk.objects.get(produk=item.get('produk'))
+                        updt_stok_old_produk.stok += item.get('kuantitas')
+                        updt_stok_old_produk.save()
+
+                        item_quantity.delete()
+
+                    new_qty = Quantity(
+                        detail_faktur_penjualan=detail_penjualan,
+                        produk=Produk.objects.get(id_produk=request.POST.get('id_produk')),
+                        kuantitas=request.POST.get('kuantitas')
+                    )
+                    new_qty.save()
+                else:
+                    quantity.update(
+                        produk=request.POST.get('id_produk'),
+                        kuantitas=request.POST.get('kuantitas')
+                    )
 
                 # except:
                 #     detail_penjualan = DetailFakturPenjualan.objects.create(
@@ -619,16 +659,18 @@ def add_data_penjualan(normalisasi_penjualan, req, save_to_database=True):
     # baru nyampe sini ya update nya
     penjualan__id_produk = {}
     for index, jml_produk in enumerate(produk_yang_dipilih):
-        temporary_stock = jml_produk[0].get('stok')
+        # temporary_stock = jml_produk[0].get('stok')
         kuantitas = kebutuhan_costumer[index]
+
         for item in jml_produk:
-            if kuantitas < temporary_stock:
-                penjualan__id_produk[item.get('id_produk')] = kuantitas
-                break
-            else:
-                penjualan__id_produk[item.get('id_produk')] = item.get('stok')
-                kuantitas -= item.get('stok')
-            temporary_stock += item.get('stok')
+            if item.get('stok') != 0:
+
+                if kuantitas < item.get('stok'):
+                    penjualan__id_produk[item.get('id_produk')] = kuantitas
+                    break
+                else:
+                    penjualan__id_produk[item.get('id_produk')] = item.get('stok')
+                    kuantitas -= item.get('stok')
 
     to_database = Penjualan(req.POST)
     if to_database.is_valid():
@@ -643,13 +685,14 @@ def add_data_penjualan(normalisasi_penjualan, req, save_to_database=True):
             insert_to_detail_penjualan.save()
             # save to ManyToManyField
             for item_produk, kuantitas in penjualan__id_produk.items():
-                produk = Produk.objects.get(id_produk=item_produk)
-                quantitys = Quantity(
-                    produk=produk,
-                    detail_faktur_penjualan=insert_to_detail_penjualan,
-                    kuantitas=kuantitas
-                )
-                quantitys.save()
+                if kuantitas > 0:
+                    produk = Produk.objects.get(id_produk=item_produk)
+                    quantitys = Quantity(
+                        produk=produk,
+                        detail_faktur_penjualan=insert_to_detail_penjualan,
+                        kuantitas=kuantitas
+                    )
+                    quantitys.save()
 
         # update stok produk berdasarkan kuantitas dari customer, diurutkan base on expired
 
