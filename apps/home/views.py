@@ -2,7 +2,6 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
-from django import template
 from collections import defaultdict
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
@@ -15,7 +14,6 @@ from django.shortcuts import redirect
 from django.contrib import messages
 import pandas as pd
 import re
-import numpy as np
 
 
 def normalisasi_harga_jual(nama_produk: str, jenis_produk: str):
@@ -26,29 +24,39 @@ def normalisasi_harga_jual(nama_produk: str, jenis_produk: str):
                'produk__detailfakturpembelian__harga_satuan')
     df = pd.DataFrame(detail_produk)
     df.tanggal_kadaluarsa = [item.year for item in df.tanggal_kadaluarsa]
+
+    # grouping base on nama produk dengan tahun yang sama dan hitung rata2
     df_groupby = df.groupby(['produk__nama_produk', 'tanggal_kadaluarsa']).mean()
     dd_raw_detail_produk = defaultdict(lambda: defaultdict(float))
     for index, rows in df_groupby.iterrows():
         dd_raw_detail_produk[index[0]][index[1]] = rows.produk__detailfakturpembelian__harga_satuan
 
+    # perhitungan HJP HJM
     dd_clean_detail_produk = defaultdict(lambda: defaultdict(list))
     for produk, tahun_harga in dd_raw_detail_produk.items():
         n, steps = len(tahun_harga), []
+
+        # pengecekan selisih tahun
         selisih = [item - list(tahun_harga.keys())[0] for item in tahun_harga.keys()]
 
+        # hitung bobot
         for index, (tahun, harga_beli) in enumerate(tahun_harga.items()):
             # bobot = (selisih[index] / sum(selisih) / 10)
             try:
                 bobot = (selisih[index] / sum(selisih) / 10)
             except ZeroDivisionError:
                 bobot = 0
+            # harga jual
             hj = (harga_beli * bobot + harga_beli)  # rumus harga jual = hb × bobot + hb
 
+            # hitung harga jual margin
             hjp = hj * 0.2 + hj  # rumus hjp = hj * margin + hj; margin = 0.2
 
+            # tampilkan harga jual margin
             dd_clean_detail_produk[produk][tahun] = [harga_beli, hjp]
             steps.append(tahun)
 
+    # hasil rata - rata
     output = {}
     for key, value in dd_clean_detail_produk.items():
         for tahun, harga in value.items():
@@ -228,7 +236,6 @@ def pages(request):
                     penjualan.save()
                 else:
                     return raw_check
-
 
                 # update item pada detail faktur penjualan
                 detail_penjualan = DetailFakturPenjualan.objects.get(
@@ -411,7 +418,7 @@ def pages(request):
 
     if load_template == 'product.html' or load_template == 'pdf-product.html':
         # form add produk
-        no_faktur_pembelian = FakturPembelian.objects.values('no_faktur_pembelian')
+        no_faktur_pembelian = FakturPembelian.objects.order_by('-no_faktur_pembelian').values('no_faktur_pembelian')
         jenis_produk = JenisProduk.objects.values('nama_jenis_produk')
 
         context['no_faktur_pembelian'] = no_faktur_pembelian
@@ -610,15 +617,17 @@ def add_data_penjualan(normalisasi_penjualan, req, save_to_database=True):
         return raw_check
 
     # baru nyampe sini ya update nya
-    penjualan__id_produk = []
+    penjualan__id_produk = {}
     for index, jml_produk in enumerate(produk_yang_dipilih):
         temporary_stock = jml_produk[0].get('stok')
+        kuantitas = kebutuhan_costumer[index]
         for item in jml_produk:
-            if kebutuhan_costumer[index] < temporary_stock:
-                penjualan__id_produk.append(item.get('id_produk'))
+            if kuantitas < temporary_stock:
+                penjualan__id_produk[item.get('id_produk')] = kuantitas
                 break
             else:
-                penjualan__id_produk.append(item.get('id_produk'))
+                penjualan__id_produk[item.get('id_produk')] = item.get('stok')
+                kuantitas -= item.get('stok')
             temporary_stock += item.get('stok')
 
     to_database = Penjualan(req.POST)
@@ -633,7 +642,7 @@ def add_data_penjualan(normalisasi_penjualan, req, save_to_database=True):
                     no_faktur_penjualan=to_database.instance.no_faktur_penjualan))
             insert_to_detail_penjualan.save()
             # save to ManyToManyField
-            for item_produk, kuantitas in zip(penjualan__id_produk, kebutuhan_costumer):
+            for item_produk, kuantitas in penjualan__id_produk.items():
                 produk = Produk.objects.get(id_produk=item_produk)
                 quantitys = Quantity(
                     produk=produk,
