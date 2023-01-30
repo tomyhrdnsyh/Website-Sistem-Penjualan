@@ -69,7 +69,7 @@
                   <h3 class="card-title">Tabel Penjualan</h3>
                   <div class="float-sm-right">
                       <button type="button" title="tambah data" data-toggle="modal" data-target="#modal-lg" class="btn btn-success">Tambah Data</button>
-                      <a href="/pdf-penjualan.html" id="penjualan" class="btn btn-warning">Cetak PDF</a>
+                      <button type="button" id="cetak-pdf" data-toggle="modal" data-target="#modal-cetak-pdf" class="btn btn-warning">Cetak PDF</button>
                       <button type="button" title="Cetak excel" id="exportexcel" data-toggle="tooltip" class="btn btn-info">Cetak Excel</button>
                   </div>
               </div>
@@ -217,6 +217,33 @@
             <!-- /.modal-dialog -->
           </div>
         <!-- /.Modal Edit -->
+
+        <!-- /.Modal Cetak PDF -->
+        <div class="modal fade" id="modal-cetak-pdf">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title mb-4">Cetak PDF</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                    <form class="sales-form webform" method="GET">
+                        <label>Day :</label>
+                        <input name="day" type="text" class="form-control form-custom" data-toggle="tooltip" placeholder="1 - 31">
+                        <label>Month :</label>
+                        <input name="month" type="text" class="form-control form-custom" data-toggle="tooltip" placeholder="1 - 12">
+                        <label>Year :</label>
+                        <input name="year" type="text" class="form-control form-custom" data-toggle="tooltip" placeholder="2023">
+                        <button type="submit" class="btn btn-danger form-control" style="margin-top: 2.3rem;">Cetak Penjualan</button>
+                    </form>
+                </div>
+              </div>
+              <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+          </div>
 
         <!-- Modal Delete -->
         <div class="modal fade" id="modal-delete">

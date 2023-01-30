@@ -10,6 +10,7 @@ from django.urls import reverse
 from .models import *
 from .form import Penjualan, FormDistributor
 from datetime import datetime
+from django.db.models import Q
 from django.shortcuts import redirect
 from django.contrib import messages
 import pandas as pd
@@ -156,7 +157,7 @@ def pages(request):
         return HttpResponseRedirect(reverse('admin:index'))
 
     # ====== MENU PENJUALAN ======
-    if load_template == 'penjualan.html' or load_template == 'pdf-penjualan.html':
+    if load_template == 'penjualan.html':
 
         # ------------ form modal ------------
         get_data_produk = Produk.objects.order_by('detailproduk__tanggal_kadaluarsa').values(
@@ -189,56 +190,26 @@ def pages(request):
         context['form_penjualan'] = Penjualan
 
         # Tabel penjualan
-        sales = FakturPenjualan.objects. \
-            order_by('no_faktur_penjualan').values('no_faktur_penjualan', 'konsumen__nama_konsumen',
-                                                    'konsumen__alamat_konsumen',
-                                                    'detailfakturpenjualan__produk__nama_produk',
-                                                    'tanggal_jual', 'detailfakturpenjualan__quantity__kuantitas',
-                                                    'detailfakturpenjualan__produk__id_produk',
-                                                    'detailfakturpenjualan__produk__detailproduk__harga_jual_satuan')
 
-        df_raw = pd.DataFrame(sales)
-        if not df_raw.empty:
-            cek_nama_produk = df_raw[['no_faktur_penjualan', 'detailfakturpenjualan__produk__nama_produk']].value_counts().to_dict()
+        if 'day' in request.GET:
 
-            for key, value in cek_nama_produk.items():
-                if value > 1:
-                    filtering = df_raw[(df_raw['no_faktur_penjualan'] == key[0]) & (df_raw['detailfakturpenjualan__produk__nama_produk'] == key[1])]
-                    rata_harga_jual = filtering['detailfakturpenjualan__produk__detailproduk__harga_jual_satuan'].mean()
-                    kuantitas = filtering['detailfakturpenjualan__quantity__kuantitas'].sum()
+            load_template = 'pdf-penjualan.html'
 
-                    df_raw['detailfakturpenjualan__produk__id_produk'] = df_raw['detailfakturpenjualan__produk__id_produk'].astype(str)
-                    index = list(filtering.index)
-                    id_products = df_raw.loc[index, 'detailfakturpenjualan__produk__id_produk'].to_list()
+            day = request.GET.get('day')
+            month = request.GET.get('month')
+            year = request.GET.get('year')
 
-                    df_raw['detailfakturpenjualan__produk__detailproduk__harga_jual_satuan'][index[0]] = rata_harga_jual
-                    df_raw['detailfakturpenjualan__quantity__kuantitas'][index[0]] = kuantitas
-                    # df_raw['detailfakturpenjualan__produk__id_produk'][index[0]] = 'P'.join(id_products)
-
-                    df_raw = df_raw.drop(index[1:])
-                    sales = df_raw.to_dict(orient="record")
-
-        for item in sales:
-            qty = item['detailfakturpenjualan__quantity__kuantitas']
-            hjm = item['detailfakturpenjualan__produk__detailproduk__harga_jual_satuan']
-
-            if qty is None or hjm is None:
-                faktur_jual = FakturPenjualan.objects.get(no_faktur_penjualan=item['no_faktur_penjualan'])
-                faktur_jual.delete()
+            if len(day) == 0 and len(month) == 0 and len(year) == 0:
+                sales = data_table_penjualan()
             else:
-                item['total'] = int(qty * hjm)
 
-        df_sale = pd.DataFrame(sales)
+                filter = [day if len(request.GET.get('day')) > 0 else 'xxx',
+                          month if len(request.GET.get('month')) > 0 else 'xxx',
+                          year if len(request.GET.get('year')) >= 4 else 'xxx']
 
-        if not df_sale.empty:
-            groupby_faktur_penjualan = df_sale.groupby(['no_faktur_penjualan']).sum()
-            jumlah = {index: rows.total for index, rows in groupby_faktur_penjualan.iterrows()}
-
-            for key, value in jumlah.items():
-                for item in sales:
-                    if key == item['no_faktur_penjualan']:
-                        item['jumlah'] = f"{value:,}"
-                        break
+                sales = data_table_penjualan(filter)
+        else:
+            sales = data_table_penjualan()
 
         context['penjualan'] = sales
         # End tabel penjualan
@@ -739,3 +710,84 @@ def add_faktur_pembelian_detail_product(req, insert_faktur_pembelian):
         harga_jual_satuan=float(req.POST.get('harga_satuan')) * 0.2 + float(
             req.POST.get('harga_satuan'))
     )
+
+def data_table_penjualan(filter=None):
+    if filter is not None:
+        if filter[0] != 'xxx' and filter[1] != 'xxx' and filter[2] != 'xxx':
+            sales = FakturPenjualan.objects.filter(Q(tanggal_jual__day__icontains=filter[0]) &
+                                                   Q(tanggal_jual__month__icontains=filter[1]) &
+                                                   Q(tanggal_jual__year__icontains=filter[2]))
+
+        elif filter[0] != 'xxx' and filter[1] != 'xxx':
+            sales = FakturPenjualan.objects.filter(Q(tanggal_jual__day__icontains=filter[0]) &
+                                                   Q(tanggal_jual__month__icontains=filter[1]))
+
+        else:
+            sales = FakturPenjualan.objects.filter(Q(tanggal_jual__day__icontains=filter[0]) |
+                                                   Q(tanggal_jual__month__icontains=filter[1]) |
+                                                   Q(tanggal_jual__year__icontains=filter[2]))
+
+        sales = sales.values(
+            'no_faktur_penjualan', 'konsumen__nama_konsumen',
+            'konsumen__alamat_konsumen',
+            'detailfakturpenjualan__produk__nama_produk',
+            'tanggal_jual', 'detailfakturpenjualan__quantity__kuantitas',
+            'detailfakturpenjualan__produk__id_produk',
+            'detailfakturpenjualan__produk__detailproduk__harga_jual_satuan'
+        )
+    else:
+        sales = FakturPenjualan.objects. \
+            order_by('no_faktur_penjualan').values('no_faktur_penjualan', 'konsumen__nama_konsumen',
+                                                   'konsumen__alamat_konsumen',
+                                                   'detailfakturpenjualan__produk__nama_produk',
+                                                   'tanggal_jual', 'detailfakturpenjualan__quantity__kuantitas',
+                                                   'detailfakturpenjualan__produk__id_produk',
+                                                   'detailfakturpenjualan__produk__detailproduk__harga_jual_satuan')
+
+    df_raw = pd.DataFrame(sales)
+    if not df_raw.empty:
+        cek_nama_produk = df_raw[
+            ['no_faktur_penjualan', 'detailfakturpenjualan__produk__nama_produk']].value_counts().to_dict()
+
+        for key, value in cek_nama_produk.items():
+            if value > 1:
+                filtering = df_raw[(df_raw['no_faktur_penjualan'] == key[0]) & (
+                            df_raw['detailfakturpenjualan__produk__nama_produk'] == key[1])]
+                rata_harga_jual = filtering['detailfakturpenjualan__produk__detailproduk__harga_jual_satuan'].mean()
+                kuantitas = filtering['detailfakturpenjualan__quantity__kuantitas'].sum()
+
+                df_raw['detailfakturpenjualan__produk__id_produk'] = df_raw[
+                    'detailfakturpenjualan__produk__id_produk'].astype(str)
+                index = list(filtering.index)
+                id_products = df_raw.loc[index, 'detailfakturpenjualan__produk__id_produk'].to_list()
+
+                df_raw['detailfakturpenjualan__produk__detailproduk__harga_jual_satuan'][index[0]] = rata_harga_jual
+                df_raw['detailfakturpenjualan__quantity__kuantitas'][index[0]] = kuantitas
+                # df_raw['detailfakturpenjualan__produk__id_produk'][index[0]] = 'P'.join(id_products)
+
+                df_raw = df_raw.drop(index[1:])
+                sales = df_raw.to_dict(orient="record")
+
+    for item in sales:
+        qty = item['detailfakturpenjualan__quantity__kuantitas']
+        hjm = item['detailfakturpenjualan__produk__detailproduk__harga_jual_satuan']
+
+        if qty is None or hjm is None:
+            faktur_jual = FakturPenjualan.objects.get(no_faktur_penjualan=item['no_faktur_penjualan'])
+            faktur_jual.delete()
+        else:
+            item['total'] = int(qty * hjm)
+
+    df_sale = pd.DataFrame(sales)
+
+    if not df_sale.empty:
+        groupby_faktur_penjualan = df_sale.groupby(['no_faktur_penjualan']).sum()
+        jumlah = {index: rows.total for index, rows in groupby_faktur_penjualan.iterrows()}
+
+        for key, value in jumlah.items():
+            for item in sales:
+                if key == item['no_faktur_penjualan']:
+                    item['jumlah'] = f"{value:,}"
+                    break
+
+    return sales
