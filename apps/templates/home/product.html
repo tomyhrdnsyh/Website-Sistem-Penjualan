@@ -80,7 +80,7 @@
                   {% for item in produk %}
                       <tr id="produk-{{ item.id_produk }}">
 
-                        <td>P{{ item.id_produk }}</td>
+                        <td>{{ item.id_produk }}</td>
                         <td class="nama-produk">{{ item.nama_produk }}</td>
                         <td class="harga-beli">{{ item.detailfakturpembelian__harga_satuan }}</td> {#|floatformat:"0" untuk menghilangkan 0 diakhir digit#}
                         <td class="harga-jual">{{ item.detailproduk__harga_jual_satuan }}</td> {#|floatformat:"0" untuk menghilangkan 0 diakhir digit#}
@@ -88,17 +88,12 @@
                         <td class="jenis">{{ item.jenis_produk__nama_jenis_produk }}</td>
                         <td class="kadaluarsa">{{ item.detailproduk__tanggal_kadaluarsa }}</td>
                         <td class="text-center">
-                            {% if item.detailproduk__faktur_pembelian__no_faktur_pembelian != 'Kosong' %}
-                            <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.id_produk }}, {{ item.detailproduk__faktur_pembelian__no_faktur_pembelian }})"
-                                    data-toggle="modal" id="edit" class="btn btn-success btn-sm">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            {% else %}
+                            <input type="hidden" id="{{ item.id_produk }}-dist" value="{{ item.detailproduk__faktur_pembelian__petugas__distributor__nama_distributor }}">
+                            <input type="hidden" id="{{ item.id_produk }}-pembelian" value="{{ item.detailproduk__faktur_pembelian__no_faktur_pembelian }}">
                             <button type="button" title="edit" data-target="#modal-edit" onClick="editPenjualan({{ item.id_produk }})"
                                 data-toggle="modal" id="edit" class="btn btn-success btn-sm">
                             <i class="fas fa-edit"></i>
                             </button>
-                            {% endif %}
                             <button type="button" title="delete" data-toggle="modal" data-target="#modal-delete"
                                     onClick="deletePenjualan({{ item.id_produk }})" class="btn btn-danger btn-sm">
                                 <i class="far fa-trash-alt"></i>
@@ -132,10 +127,10 @@
                     <form class="sales-form webform" method="POST">
                         {% csrf_token %}
 
-                        <label for="no_faktur_pembelian">No faktur pembelian:</label>
-                        <select name="no_faktur_pembelian" required class="form-control form-control-lg form-custom" id="no_faktur_pembelian">
-                            {% for item in no_faktur_pembelian %}
-                           <option value="{{ item.no_faktur_pembelian }}">{{ item.no_faktur_pembelian }}</option>
+                        <label for="distributor">Distributor:</label>
+                        <select name="distributor" required class="form-control form-control-lg form-custom" id="distributor">
+                            {% for item in distributor %}
+                           <option value="{{ item.nama_distributor }}">{{ item.nama_distributor }}</option>
                             {% endfor %}
                         </select>
 
@@ -147,7 +142,11 @@
                         </select>
 
                         <label for="nama_produk">Nama produk:</label>
-                        <input type="text" name="nama_produk" class="form-control form-custom" required id="nama_produk">
+                        <select name="nama_produk" class="form-control form-control-lg form-custom" id="nama_produk">
+                            {% for item in nama_produk %}
+                           <option value="{{ item.nama_produk }}">{{ item.nama_produk }}</option>
+                            {% endfor %}
+                        </select>
 
                         <label for="id_kuantitas">Kuantitas:</label>
                         <input type="number" name="kuantitas" data-toggle="tooltip" title="Stok" class="form-control form-control-lg form-custom" required="" id="id_kuantitas">
@@ -182,10 +181,10 @@
                     <form class="sales-form webform" method="POST">
                         {% csrf_token %}
                         <input name="id" type="hidden" id="edit-id">
-                        <label for="faktur-pembelian">No faktur pembelian:</label>
-                        <select name="no_faktur_pembelian" required class="form-control form-control-lg form-custom" id="faktur-pembelian">
-                            {% for item in no_faktur_pembelian %}
-                           <option value="{{ item.no_faktur_pembelian }}">{{ item.no_faktur_pembelian }}</option>
+                        <label for="distributor">Distributor:</label>
+                        <select name="distributor" required class="form-control form-control-lg form-custom" id="distributor-option">
+                            {% for item in distributor %}
+                           <option value="{{ item.nama_distributor }}">{{ item.nama_distributor }}</option>
                             {% endfor %}
                         </select>
 
@@ -208,6 +207,7 @@
                         <label for="tanggal_kadaluarsa_edit">Tanggal kadaluarsa:</label>
                         <input name="tanggal_kadaluarsa" type="date" class="form-control form-custom" id="tanggal_kadaluarsa_edit" required>
 
+                        <input type="hidden" id="pembelian-option" name="no_faktur_pembelian">
                         <button type="submit" class="form-control" style="margin-top: 2.3rem;" name="update" id="submit-button">Edit Produk</button>
                     </form>
                 </div>
@@ -295,17 +295,20 @@
     }
 
     // update penjualan
-    function editPenjualan(id, id_pembelian) {
-        id_beli = id_pembelian;
+    function editPenjualan(id) {
         tr_id = '#produk-' + id;
         jenis = $(tr_id).find(".jenis").text();
         nama = $(tr_id).find(".nama-produk").text();
+        distributor = document.getElementById(id+"-dist").value;
+        pembelian = document.getElementById(id+"-pembelian").value;
+
         kuantitas = $(tr_id).find(".stok").text();
         harga_beli = $(tr_id).find(".harga-beli").text();
         kadaluarsa = formatDate($(tr_id).find(".kadaluarsa").text());
 
         $('#edit-id').val(id);
-        $('#faktur-pembelian').val(id_beli);
+        $('#distributor-option').val(distributor);
+        $('#pembelian-option').val(pembelian);
         $('#jenis-produk').val(jenis);
         $('#nama-produk').val(nama);
         $('#kuantitas').val(kuantitas);

@@ -16,6 +16,8 @@ from django.contrib import messages
 import pandas as pd
 import re
 
+MARGIN = Margin.objects.all()[0].margin if Margin.objects.all() else 0.2
+
 
 def normalisasi_harga_jual(nama_produk: str, jenis_produk: str):
     detail_produk = DetailProduk.objects. \
@@ -24,46 +26,21 @@ def normalisasi_harga_jual(nama_produk: str, jenis_produk: str):
         values('id_detail_produk', 'produk__nama_produk', 'tanggal_kadaluarsa',
                'produk__detailfakturpembelian__harga_satuan')
     df = pd.DataFrame(detail_produk)
-    df.tanggal_kadaluarsa = [item.year for item in df.tanggal_kadaluarsa]
+    # df.tanggal_kadaluarsa = [item.year for item in df.tanggal_kadaluarsa]
 
     # grouping base on nama produk dengan tahun yang sama dan hitung rata2
-    df_groupby = df.groupby(['produk__nama_produk', 'tanggal_kadaluarsa']).mean()
+    df_groupby = df.groupby(['produk__nama_produk']).max()
     dd_raw_detail_produk = defaultdict(lambda: defaultdict(float))
     for index, rows in df_groupby.iterrows():
-        dd_raw_detail_produk[index[0]][index[1]] = rows.produk__detailfakturpembelian__harga_satuan
-
-    # perhitungan HJP HJM
-    dd_clean_detail_produk = defaultdict(lambda: defaultdict(list))
-    for produk, tahun_harga in dd_raw_detail_produk.items():
-        n, steps = len(tahun_harga), []
-
-        # pengecekan selisih tahun
-        selisih = [item - list(tahun_harga.keys())[0] for item in tahun_harga.keys()]
-
-        # hitung bobot
-        for index, (tahun, harga_beli) in enumerate(tahun_harga.items()):
-            # bobot = (selisih[index] / sum(selisih) / 10)
-            try:
-                bobot = (selisih[index] / sum(selisih) / 10)
-            except ZeroDivisionError:
-                bobot = 0
-            # harga jual
-            hj = (harga_beli * bobot + harga_beli)  # rumus harga jual = hb × bobot + hb
-
-            # hitung harga jual margin
-            hjp = hj * 0.2 + hj  # rumus hjp = hj * margin + hj; margin = 0.2
-
-            # tampilkan harga jual margin
-            dd_clean_detail_produk[produk][tahun] = [harga_beli, hjp]
-            steps.append(tahun)
+        # dd_raw_detail_produk[index[0]][index[1]] = rows.produk__detailfakturpembelian__harga_satuan
+        dd_raw_detail_produk[index] = rows.produk__detailfakturpembelian__harga_satuan
 
     # hasil rata - rata
     output = {}
-    for key, value in dd_clean_detail_produk.items():
-        for tahun, harga in value.items():
-            for item in detail_produk:
-                if key == item['produk__nama_produk'] and tahun == item['tanggal_kadaluarsa'].year:
-                    output[item['id_detail_produk']] = harga[-1]
+    for key, value in dd_raw_detail_produk.items():
+        for item in detail_produk:
+            if key == item['produk__nama_produk']:
+                output[item['id_detail_produk']] = value + (value * MARGIN)
     return output
 
 
@@ -429,19 +406,26 @@ def pages(request):
 
     if load_template == 'product.html' or load_template == 'pdf-product.html':
         # form add produk
-        no_faktur_pembelian = FakturPembelian.objects.order_by('-no_faktur_pembelian').values('no_faktur_pembelian')
-        jenis_produk = JenisProduk.objects.values('nama_jenis_produk')
+        distributor = Distributor.objects.values('nama_distributor')
 
-        context['no_faktur_pembelian'] = no_faktur_pembelian
+        jenis_produk = JenisProduk.objects.values('nama_jenis_produk')
+        nama_produk = Produk.objects.order_by('-id_produk').values('nama_produk')
+        nama_produk = [dict(output) for output in {tuple(nama.items()) for nama in nama_produk}]
+
+        context['distributor'] = distributor
         context['jenis_produk'] = jenis_produk
+        context['nama_produk'] = nama_produk
         # end form add produk
 
         # ===== table produk =====
         produk = Produk.objects.order_by('-id_produk').values(
             'id_produk', 'nama_produk', 'detailfakturpembelian__harga_satuan',
             'detailproduk__stok', 'jenis_produk__nama_jenis_produk', 'detailproduk__harga_jual_satuan',
-            'detailproduk__tanggal_kadaluarsa', 'detailproduk__faktur_pembelian__no_faktur_pembelian'
+            'detailproduk__tanggal_kadaluarsa',
+            'detailproduk__faktur_pembelian__no_faktur_pembelian',
+            'detailproduk__faktur_pembelian__petugas__distributor__nama_distributor',
         )
+
         # ----- replace None to kosong and change price type to int -----
         for item in produk:
             for key, value in item.items():
@@ -464,6 +448,8 @@ def pages(request):
                 faktur_jual = FakturPenjualan.objects.filter(detailfakturpenjualan__produk=delete_produk)
                 faktur_jual.delete()
                 delete_produk.delete()
+
+                # update_harga_jual_to_database(delete_produk.nama_produk, delete_produk.jenis_produk)
 
             elif 'update' in request.POST:
                 id_global = re.findall(r'\d+', request.POST.get('id'))
@@ -497,7 +483,7 @@ def pages(request):
                         no_faktur_pembelian=request.POST.get('no_faktur_pembelian'))
                     detail_produk.stok = request.POST.get('kuantitas')
                     detail_produk.tanggal_kadaluarsa = request.POST.get('tanggal_kadaluarsa')
-                    detail_produk.harga_jual_satuan = float(request.POST.get('harga_satuan')) * 0.2 + float(
+                    detail_produk.harga_jual_satuan = float(request.POST.get('harga_satuan')) * MARGIN + float(
                         request.POST.get('harga_satuan'))
                     detail_produk.save()
 
@@ -508,30 +494,35 @@ def pages(request):
                         produk=Produk.objects.get(id_produk=produk.id_produk),
                         stok=request.POST.get('kuantitas'),
                         tanggal_kadaluarsa=request.POST.get('tanggal_kadaluarsa'),
-                        harga_jual_satuan=float(request.POST.get('harga_satuan')) * 0.2 + float(
+                        harga_jual_satuan=float(request.POST.get('harga_satuan')) * MARGIN + float(
                             request.POST.get('harga_satuan'))
                     )
                 update_harga_jual_to_database(request.POST.get('nama_produk'), request.POST.get('jenis_produk'))
+
             else:
+                faktur_pembelian = FakturPembelian.objects.order_by('-no_faktur_pembelian').filter(
+                    petugas=Petugas.objects.get(
+                        distributor=Distributor.objects.get(
+                            nama_distributor=request.POST.get('distributor')))
+                )[0]
+
                 insert_produk = Produk.objects. \
                     create(nama_produk=request.POST.get('nama_produk'),
                            jenis_produk=JenisProduk.objects.get(nama_jenis_produk=request.POST.get('jenis_produk')))
 
                 DetailFakturPembelian.objects.create(
-                    faktur_pembelian=FakturPembelian.objects.get(
-                        no_faktur_pembelian=request.POST.get('no_faktur_pembelian')),
+                    faktur_pembelian=faktur_pembelian,
                     produk=Produk.objects.get(id_produk=insert_produk.id_produk),
                     kuantitas=request.POST.get('kuantitas'),
                     harga_satuan=request.POST.get('harga_satuan')
                 )
 
                 DetailProduk.objects.create(
-                    faktur_pembelian=FakturPembelian.objects.get(
-                        no_faktur_pembelian=request.POST.get('no_faktur_pembelian')),
+                    faktur_pembelian=faktur_pembelian,
                     produk=Produk.objects.get(id_produk=insert_produk.id_produk),
                     stok=request.POST.get('kuantitas'),
                     tanggal_kadaluarsa=request.POST.get('tanggal_kadaluarsa'),
-                    harga_jual_satuan=float(request.POST.get('harga_satuan')) * 0.2 + float(
+                    harga_jual_satuan=float(request.POST.get('harga_satuan')) * MARGIN + float(
                         request.POST.get('harga_satuan'))
                 )
 
@@ -707,7 +698,7 @@ def add_faktur_pembelian_detail_product(req, insert_faktur_pembelian):
         produk=Produk.objects.get(id_produk=insert_produk.id_produk),
         stok=req.POST.get('kuantitas'),
         tanggal_kadaluarsa=req.POST.get('tanggal_kadaluarsa'),
-        harga_jual_satuan=float(req.POST.get('harga_satuan')) * 0.2 + float(
+        harga_jual_satuan=float(req.POST.get('harga_satuan')) * MARGIN + float(
             req.POST.get('harga_satuan'))
     )
 

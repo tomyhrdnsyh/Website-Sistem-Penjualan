@@ -180,3 +180,11 @@ class Quantity(models.Model):
 
     class Meta:
         db_table = 'kuantitas_penjualan'
+
+
+class Margin(models.Model):
+    id_margin = models.AutoField(primary_key=True)
+    margin = models.FloatField()
+
+    def __str__(self):
+        return str(self.margin)

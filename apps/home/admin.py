@@ -40,6 +40,11 @@ class DistributorAdmin(admin.ModelAdmin):
     list_display = ("id_distributor", "nama_distributor", "no_telepon", "alamat_distributor")
 
 
+@admin.register(Margin)
+class MarginAdmin(admin.ModelAdmin):
+    list_display = ("id_margin", "margin",)
+
+
 @admin.register(Petugas)
 class OfficerAdmin(admin.ModelAdmin):
     list_display = ("id_petugas", "nama_petugas", "distributor")
